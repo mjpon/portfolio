@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Abandoned vehicle map | Mitchell</title>
-<meta name="description" content="A map of abandoned-vehicle reports in Bay Area cities. San Francisco, Oakland and San Jose come first.">
+<meta name="description" content="A map of 311 abandoned-vehicle reports in San Francisco, Oakland and San José, from 2008 to 2026. It shows reports, not cars.">
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
@@ -30,21 +30,22 @@
 <a class="textlink back" href="../../#work">All work</a>
 <p class="where"><a class="badge" href="../../#line-maps"><svg class="st" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="#shape-circle"/></svg>Maps</a></p>
 <h1 class="display sm">Abandoned vehicle map</h1>
-<p class="lede">A map of abandoned-vehicle reports in Bay Area cities. San Francisco, Oakland and San Jose come first.</p>
+<p class="lede">A map of 311 abandoned-vehicle reports in San Francisco, Oakland and San José, from 2008 to 2026. It shows reports, not cars.</p>
 <dl class="facts">
-<div class="frow"><dt>Status</dt><dd>In development</dd></div>
-<div class="frow"><dt>Made with</dt><dd>City open data, GeoJSON</dd></div>
+<div class="frow"><dt>Status</dt><dd>Alpha (preview)</dd></div>
+<div class="frow"><dt>Made with</dt><dd>Python, Leaflet, city open data</dd></div>
 <div class="frow"><dt>Data</dt><dd>City 311 service requests</dd></div>
+<div class="frow"><dt>Coverage</dt><dd>San Francisco, Oakland, San José</dd></div>
 </dl>
 <section class="prose">
 <h2>What it does</h2>
-<p>Each city publishes 311 service requests in its own format. This project filters them down to abandoned-vehicle reports and converts them to one shared format: city, request ID, opened and closed dates, status and location.</p>
-<p>Oakland publishes coordinates in a local projection, so they are converted to standard latitude and longitude. Requests with bad coordinates are dropped.</p>
+<p>Zoomed out, the map shades squares of about a block by how many reports they have, outlines the neighborhoods and ranks them in a list beside it. Zoomed in, each dot is one spot of about 35 feet, and a larger dot means more reports there. A data page charts the same reports over time.</p>
+<p>It maps reports, not cars. No license plate, photo, address or free text is kept, and the About page explains what a square or a dot does and does not mean.</p>
 </section>
 <section class="prose">
 <h2>How it’s built</h2>
-<p>It follows the same pipeline as the derelict vessel map. A script normalizes the data to GeoJSON, and a static map reads the file. License plates and photo links stay out of the output.</p>
-<p>The plan is to start with the Bay Area counties and add others after that.</p>
+<p>Python scripts turn each city’s 311 export into one shared format and write the squares, neighborhood totals and dots as static files. The site is plain HTML, JavaScript and Leaflet, with no framework and no server.</p>
+<p>Each city records things differently, so the page does not compare cities by their totals. San José’s newer “Vehicle Concerns” category most likely continues the same work after March 2024, but the city does not say so, so it is a separate switch.</p>
 </section>
 <nav class="pager" aria-label="More work">
 <a class="prev" href="../derelict-vessel-map/"><span class="dir">Previous</span><span class="to">Derelict vessel map</span></a>

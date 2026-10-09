@@ -45,12 +45,17 @@ LINE_OF = {
     "ppe-inspection-report": "tools",
 }
 
-# Hosted versions of the apps. When one is live, add its slug and address here, run this
+# Hosted versions of the projects. Each one is its own Cloudflare Pages project on a
+# mitchell-pon.com subdomain. Once an address loads, remove the "#" from its line, run this
 # script again, and the project page gets an "Open the live version" button.
 LIVE = {
-    # "car-maker-identifier": "https://your-app-name.streamlit.app",
-    # "ppe-inspection-report": "https://your-project.vercel.app",
+    # "abandoned-vehicle-map": "https://vehicles.mitchell-pon.com",
+    # "ppe-inspection-report": "https://ppe.mitchell-pon.com",
+    # "car-maker-identifier": "https://cars.mitchell-pon.com",
+    # "derelict-vessel-map": "https://boats.mitchell-pon.com",
 }
+
+STATUS = "Alpha (preview)"
 
 SPRITE = (
     '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>'
@@ -90,7 +95,7 @@ P = [
         slug="derelict-vessel-map", name="Derelict vessel map",
         blurb="A public map of abandoned boats in California, designed to read well on a phone.",
         lede="A public map of derelict and abandoned boats in California. It opens on the Bay Area and is designed to be read on a phone.",
-        made="Python, Leaflet, GeoJSON", status="Private preview",
+        made="Python, Leaflet, GeoJSON", status=STATUS,
         extra=[("Data", "BoatUS MyCoast reports"), ("Audience", "The public"),
                ("Design reference", "U.S. National Design Studio, SBB and ÖBB")],
         sections=[
@@ -103,24 +108,24 @@ P = [
                 "A list of report IDs can be excluded by hand, each with a comment explaining why. That is how test submissions and duplicates stay out. Tests check that private text never reaches the output. The site itself is static and built on Leaflet.",
             ]),
             ("Before it goes public", [
-                "The source data does not have confirmed reuse terms yet, so the map stays in private preview until those are settled with the data owner.",
+                "The source data does not have confirmed reuse terms yet, so the map is not public until those are settled with the data owner.",
             ]),
         ],
     ),
     dict(
         slug="abandoned-vehicle-map", name="Abandoned vehicle map",
-        blurb="Abandoned vehicle reports across Bay Area cities, starting with San Francisco, Oakland and San Jose.",
-        lede="A map of abandoned-vehicle reports in Bay Area cities. San Francisco, Oakland and San Jose come first.",
-        made="City open data, GeoJSON", status="In development",
-        extra=[("Data", "City 311 service requests")],
+        blurb="About 833,000 abandoned-vehicle reports from San Francisco, Oakland and San José, shown on a plain map.",
+        lede="A map of 311 abandoned-vehicle reports in San Francisco, Oakland and San José, from 2008 to 2026. It shows reports, not cars.",
+        made="Python, Leaflet, city open data", status=STATUS,
+        extra=[("Data", "City 311 service requests"), ("Coverage", "San Francisco, Oakland, San José")],
         sections=[
             ("What it does", [
-                "Each city publishes 311 service requests in its own format. This project filters them down to abandoned-vehicle reports and converts them to one shared format: city, request ID, opened and closed dates, status and location.",
-                "Oakland publishes coordinates in a local projection, so they are converted to standard latitude and longitude. Requests with bad coordinates are dropped.",
+                "Zoomed out, the map shades squares of about a block by how many reports they have, outlines the neighborhoods and ranks them in a list beside it. Zoomed in, each dot is one spot of about 35 feet, and a larger dot means more reports there. A data page charts the same reports over time.",
+                "It maps reports, not cars. No license plate, photo, address or free text is kept, and the About page explains what a square or a dot does and does not mean.",
             ]),
             ("How it’s built", [
-                "It follows the same pipeline as the derelict vessel map. A script normalizes the data to GeoJSON, and a static map reads the file. License plates and photo links stay out of the output.",
-                "The plan is to start with the Bay Area counties and add others after that.",
+                "Python scripts turn each city’s 311 export into one shared format and write the squares, neighborhood totals and dots as static files. The site is plain HTML, JavaScript and Leaflet, with no framework and no server.",
+                "Each city records things differently, so the page does not compare cities by their totals. San José’s newer “Vehicle Concerns” category most likely continues the same work after March 2024, but the city does not say so, so it is a separate switch.",
             ]),
         ],
     ),
@@ -128,7 +133,7 @@ P = [
         slug="car-maker-identifier", name="Car maker identifier",
         blurb="A Streamlit app for exploring vehicles by manufacturer, redesigned in a timetable style.",
         lede="A Streamlit app for exploring vehicle data by manufacturer. It was built a while back and has now been redesigned.",
-        made="Python, Streamlit", status="Working app",
+        made="Python, Streamlit", status=STATUS,
         extra=[("Source", ("github.com/mjpon/car-maker-identifier", REPO)),
                ("Design reference", DESIGN_RAIL)],
         sections=[
@@ -144,7 +149,7 @@ P = [
         slug="ppe-inspection-report", name="PPE inspection report",
         blurb="A digital version of a Coast Guard Auxiliary PPE inspection form, made to be filled out on a phone.",
         lede="A digital version of the personal protective equipment (PPE) inspection form used in the Coast Guard Auxiliary. It covers every field on the paper form and produces a report that can be saved.",
-        made="React, Vercel", status="Prototype",
+        made="HTML, CSS, JavaScript", status=STATUS,
         extra=[("Based on", "The paper PPE inspection report"), ("Audience", "Auxiliary members")],
         notice="Independent work by an Auxiliary member. This is not an official Coast Guard or Auxiliary product.",
         sections=[
@@ -155,7 +160,7 @@ P = [
                 "A quick first pass to show how a paper process can become a working form. The aim is to make inspection records easy to fill out and easy to find.",
             ]),
             ("How it’s built", [
-                "A single web page built with React and hosted on Vercel. There is no server or database behind it.",
+                "A single static web page with no server or database behind it. Entries save in the browser, and nothing leaves the device.",
             ]),
             ("Where it stands", [
                 "A rough first pass, not a finished product. It shows the idea.",
