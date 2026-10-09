@@ -25,7 +25,7 @@ Each project has its own GitHub repo and its own Cloudflare Worker (a Worker wit
 | Address | GitHub repo | Worker name |
 | --- | --- | --- |
 | `mitchell-pon.com` | `mjpon/portfolio` | `portfolio` |
-| `ppe.mitchell-pon.com` | `mjpon/ppe-inspection-v2` | `ppe-inspection` |
+| `ppe.mitchell-pon.com` | `mjpon/ppe-inspection-v2` | `ppe-inspection-v2` |
 | `vehicles.mitchell-pon.com` | `mjpon/abandoned-vehicle-map` | `abandoned-vehicle-map` |
 | `boats.mitchell-pon.com` | `mjpon/derelict-vessel-map` | `derelict-vessel-map` |
 | `cars.mitchell-pon.com` | `mjpon/car-maker-identifier` | `car-maker-identifier` |
@@ -46,7 +46,7 @@ A Worker lives under **Workers & Pages** at the account level. It only shows up 
 
 After that, every `git push` to `main` rebuilds and updates that site.
 
-The derelict vessel map keeps its site files at the top of the repo, next to tests, scripts and import notes. Its `wrangler.jsonc` runs `sh scripts/stage_public.sh` before each deploy, which copies only the site into `public/` and leaves out the manual exclusion list. That is the folder it serves.
+The derelict vessel map keeps its site files at the top of the repo, next to tests, scripts and import notes. A script (`sh scripts/stage_public.sh`) copies only the site into `public/`, leaving out the manual exclusion list, and `public/` is committed because that is the folder the Worker serves. After changing the site there, run the script again and commit `public/`.
 
 ## Part 2. These are proofs of concept
 
