@@ -22,15 +22,15 @@ Then open http://localhost:8000.
 
 Each project has its own GitHub repo and its own Cloudflare Worker (a Worker with static assets), on its own subdomain. The portfolio only links to them. Three of the project repos are private, and that is fine: Cloudflare can build from a private repo, and nothing from them is copied into this public one.
 
-| Address | GitHub repo | Worker name | Build command |
-| --- | --- | --- | --- |
-| `mitchell-pon.com` | `mjpon/portfolio` | `portfolio` | empty |
-| `ppe.mitchell-pon.com` | `mjpon/ppe-inspection-v2` | `ppe-inspection` | empty |
-| `vehicles.mitchell-pon.com` | `mjpon/abandoned-vehicle-map` | `abandoned-vehicle-map` | empty |
-| `boats.mitchell-pon.com` | `mjpon/derelict-vessel-map` | `derelict-vessel-map` | `sh scripts/stage_public.sh` |
-| `cars.mitchell-pon.com` | `mjpon/car-maker-identifier` | `car-maker-identifier` | empty |
+| Address | GitHub repo | Worker name |
+| --- | --- | --- |
+| `mitchell-pon.com` | `mjpon/portfolio` | `portfolio` |
+| `ppe.mitchell-pon.com` | `mjpon/ppe-inspection-v2` | `ppe-inspection` |
+| `vehicles.mitchell-pon.com` | `mjpon/abandoned-vehicle-map` | `abandoned-vehicle-map` |
+| `boats.mitchell-pon.com` | `mjpon/derelict-vessel-map` | `derelict-vessel-map` |
+| `cars.mitchell-pon.com` | `mjpon/car-maker-identifier` | `car-maker-identifier` |
 
-Every repo has its own `wrangler.jsonc` that names the Worker and the folder to serve, so the deploy command is the default for all five.
+Every repo has its own `wrangler.jsonc` that names the Worker and the folder to serve, so the build command stays empty and the deploy command is the default (`npx wrangler deploy`) for all five.
 
 ## Part 1. Deploy a project
 
@@ -38,7 +38,7 @@ Repeat this for each row in the table. You need a free Cloudflare account with m
 
 1. In the Cloudflare dashboard, go to **Workers & Pages**, then **Create**, then import a repository from GitHub. Choose **Only select repositories** and pick the repo from the table.
 2. Name the Worker exactly as in the table. It has to match the `name` in that repo's `wrangler.jsonc`. Leave **Root directory** empty and set the production branch to `main`.
-3. Set the **Build command** from the table (empty for four of them) and leave the **Deploy command** as `npx wrangler deploy`.
+3. Leave the **Build command** empty and the **Deploy command** as `npx wrangler deploy`.
 4. Save and deploy. Open the Worker, then **Deployments** (or **Builds**) and check that the build is green. It is live at `https://<worker-name>.<your-subdomain>.workers.dev`.
 5. Attach the address: in the Worker, go to **Settings**, then **Domains & Routes**, then **Add**, then **Custom Domain**, and enter the address from the table. Because mitchell-pon.com is on Cloudflare, it creates the DNS record for you. If it refuses because the name already has a DNS record, delete that record under the site's **DNS** page and add the domain again.
 
@@ -46,7 +46,7 @@ A Worker lives under **Workers & Pages** at the account level. It only shows up 
 
 After that, every `git push` to `main` rebuilds and updates that site.
 
-The derelict vessel map keeps its site files at the top of the repo, next to tests, scripts and import notes. Its build command (`sh scripts/stage_public.sh`) copies only the site into `public/`, which is what `wrangler.jsonc` serves, and leaves out the manual exclusion list.
+The derelict vessel map keeps its site files at the top of the repo, next to tests, scripts and import notes. Its `wrangler.jsonc` runs `sh scripts/stage_public.sh` before each deploy, which copies only the site into `public/` and leaves out the manual exclusion list. That is the folder it serves.
 
 ## Part 2. These are proofs of concept
 
