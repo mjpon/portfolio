@@ -79,4 +79,3 @@ The buttons point at the subdomains in the table, so each one shows an error pag
 - Keep secrets out of the repo. Keys and tokens belong in environment variables (each Worker has a **Variables & Secrets** settings page). `.gitignore` already skips `.env` files.
 - Anything that has to stay private needs to run on a server and not in the page, or sit behind Cloudflare Access.
 - `LICENSE` says all rights reserved. On GitHub, a public repo can always be viewed and forked on GitHub itself, whatever the license says. A private repo keeps the source out of sight, and Cloudflare builds from private repos.
-- ProGuard works on Java bytecode, and none of these four projects is Java, so it has nothing to do here.

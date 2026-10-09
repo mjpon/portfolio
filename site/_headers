@@ -1,4 +1,4 @@
-# Cloudflare Pages reads this file and does not serve it.
+# Cloudflare reads this file to set response headers. It is not served as a page.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
