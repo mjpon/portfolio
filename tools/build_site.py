@@ -317,8 +317,8 @@ def home_inner(preview):
         + header(True)
         + '<main id="main">\n'
         '<section class="hero" id="top">\n'
-        '  <h1 class="display">Backend engineer building maps and tools for public data</h1>\n'
-        '  <p class="lede">Five years of backend work, mostly in Java. On my own time I build maps, data apps and small tools for boating and public data.</p>\n'
+        '  <h1 class="display">Just a software engineer... who enjoys concepts and building things!</h1>\n'
+        '  <p class="lede">I love Python and dashboards! On my own time I build maps, data apps and small tools for boating and public data.</p>\n'
         '  <div class="actions"><a class="btn" href="#work">See the work</a>'
         f'<a class="btn ghost" href="{GITHUB}" target="_blank" rel="noopener">{ico("code")}GitHub</a>'
         f'<a class="btn ghost" href="{LINKEDIN}" target="_blank" rel="noopener">{ico("person")}LinkedIn</a></div>\n'
@@ -426,8 +426,8 @@ def not_found_page():
 
 def home_page_prod():
     return (
-        head(f"{NAME} | Backend engineer",
-             "Backend engineer building maps and tools for public data. Selected projects.",
+        head(f"{NAME} | Software engineer",
+             "Software engineer who enjoys concepts and building things. Maps, data apps and small tools for boating and public data.",
              "styles.css")
         + home_inner(False)
         + "</body>\n</html>\n"
