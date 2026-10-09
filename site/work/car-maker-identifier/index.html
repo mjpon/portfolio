@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Car maker identifier | Mitchell</title>
-<meta name="description" content="A Streamlit app for exploring vehicle data by manufacturer. It was built a while back and has now been redesigned.">
+<meta name="description" content="A web page that shows where new US vehicles get their engine, transmission and final assembly. It reads the parts-content labels the government requires and lets you compare manufacturers, countries and model years.">
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
@@ -30,20 +30,27 @@
 <a class="textlink back" href="../../#work">All work</a>
 <p class="where"><a class="badge" href="../../#line-apps"><svg class="st" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="#shape-square"/></svg>Data apps</a></p>
 <h1 class="display sm">Car maker identifier</h1>
-<p class="lede">A Streamlit app for exploring vehicle data by manufacturer. It was built a while back and has now been redesigned.</p>
+<p class="lede">A web page that shows where new US vehicles get their engine, transmission and final assembly. It reads the parts-content labels the government requires and lets you compare manufacturers, countries and model years.</p>
+<div class="actions live"><a class="btn" href="https://cars.mitchell-pon.com" target="_blank" rel="noopener">Open the live version</a></div>
 <dl class="facts">
 <div class="frow"><dt>Status</dt><dd>Alpha (preview)</dd></div>
-<div class="frow"><dt>Made with</dt><dd>Python, Streamlit</dd></div>
+<div class="frow"><dt>Made with</dt><dd>Python, HTML, CSS, JavaScript</dd></div>
+<div class="frow"><dt>Data</dt><dd>NHTSA parts-content reports, model years 2020 to 2026</dd></div>
 <div class="frow"><dt>Source</dt><dd><a href="https://github.com/mjpon/car-maker-identifier" target="_blank" rel="noopener">github.com/mjpon/car-maker-identifier</a></dd></div>
 <div class="frow"><dt>Design reference</dt><dd>SBB and ÖBB</dd></div>
 </dl>
 <section class="prose">
 <h2>What it does</h2>
-<p>The overview page has filters, headline numbers, rankings and a trend view. Separate pages cover parts content and assembly by manufacturer, including a per-manufacturer breakdown.</p>
+<p>Pick a model year, a manufacturer or a car line, and the page updates its headline numbers and charts: models by manufacturer, assembly country, where engines and transmissions come from, and how much of each vehicle’s parts content is from the US and Canada. A table lists every vehicle, can be sorted, and downloads as a CSV.</p>
 </section>
 <section class="prose">
-<h2>What changed in the redesign</h2>
-<p>The interface now uses a grid, hairline rules and timetable-style rows, with red as the signal color, and it works down to phone width. The code, README and dependencies were cleaned up, and the assembly page now uses corrected assembly data.</p>
+<h2>How it’s built</h2>
+<p>The reports are published as PDFs, so a Python script reads them, cleans up manufacturer names and turns country codes into country names. Another script writes the result as one JSON file. The page is plain HTML, CSS and JavaScript that draws every chart in the browser, with no server and no framework.</p>
+<p>The first version was a Streamlit app, and it is still in the repo.</p>
+</section>
+<section class="prose">
+<h2>Design</h2>
+<p>The interface uses a grid, hairline rules and timetable-style rows, with red as the signal color, and it works down to phone width.</p>
 </section>
 <nav class="pager" aria-label="More work">
 <a class="prev" href="../abandoned-vehicle-map/"><span class="dir">Previous</span><span class="to">Abandoned vehicle map</span></a>

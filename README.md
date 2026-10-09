@@ -20,30 +20,25 @@ Then open http://localhost:8000.
 
 ## Where everything lives
 
-Each project has its own GitHub repo and its own Cloudflare Worker (a Worker with static assets), on its own subdomain. The portfolio only links to them. The three private repos stay private, because Cloudflare can build from a private repo and nothing from them is copied into this public one.
+Each project has its own GitHub repo and its own Cloudflare Worker (a Worker with static assets), on its own subdomain. The portfolio only links to them. Three of the project repos are private, and that is fine: Cloudflare can build from a private repo, and nothing from them is copied into this public one.
 
-| Address | GitHub repo | Worker name | Status |
+| Address | GitHub repo | Worker name | Build command |
 | --- | --- | --- | --- |
-| `mitchell-pon.com` | `mjpon/portfolio` | `portfolio` | ready |
-| `ppe.mitchell-pon.com` | `mjpon/ppe-inspection-v2` | `ppe-inspection` | ready |
-| `vehicles.mitchell-pon.com` | `mjpon/abandoned-vehicle-map` | `abandoned-vehicle-map` | ready |
-| `boats.mitchell-pon.com` | `mjpon/derelict-vessel-map` | `derelict-vessel-map` | hold, see Part 2 |
-| `cars.mitchell-pon.com` | `mjpon/car-maker-identifier` | not decided | needs a static rebuild, see Part 2 |
+| `mitchell-pon.com` | `mjpon/portfolio` | `portfolio` | empty |
+| `ppe.mitchell-pon.com` | `mjpon/ppe-inspection-v2` | `ppe-inspection` | empty |
+| `vehicles.mitchell-pon.com` | `mjpon/abandoned-vehicle-map` | `abandoned-vehicle-map` | empty |
+| `boats.mitchell-pon.com` | `mjpon/derelict-vessel-map` | `derelict-vessel-map` | `sh scripts/stage_public.sh` |
+| `cars.mitchell-pon.com` | `mjpon/car-maker-identifier` | `car-maker-identifier` | empty |
+
+Every repo has its own `wrangler.jsonc` that names the Worker and the folder to serve, so the deploy command is the default for all five.
 
 ## Part 1. Deploy a project
 
-Repeat this for each project marked ready. You need a free Cloudflare account with mitchell-pon.com already on it.
+Repeat this for each row in the table. You need a free Cloudflare account with mitchell-pon.com already on it.
 
 1. In the Cloudflare dashboard, go to **Workers & Pages**, then **Create**, then import a repository from GitHub. Choose **Only select repositories** and pick the repo from the table.
-2. Name the Worker exactly as in the table. Leave **Root directory** empty and set the production branch to `main`.
-3. Fill in the build and deploy commands for that project:
-
-   | Project | Build command | Deploy command |
-   | --- | --- | --- |
-   | portfolio | empty | `npx wrangler deploy` (the settings are in `wrangler.jsonc`) |
-   | ppe-inspection | empty | `npx wrangler deploy --assets ./dist --name ppe-inspection --compatibility-date 2026-10-09` |
-   | abandoned-vehicle-map | empty | `npx wrangler deploy --assets ./site --name abandoned-vehicle-map --compatibility-date 2026-10-09` |
-
+2. Name the Worker exactly as in the table. It has to match the `name` in that repo's `wrangler.jsonc`. Leave **Root directory** empty and set the production branch to `main`.
+3. Set the **Build command** from the table (empty for four of them) and leave the **Deploy command** as `npx wrangler deploy`.
 4. Save and deploy. Open the Worker, then **Deployments** (or **Builds**) and check that the build is green. It is live at `https://<worker-name>.<your-subdomain>.workers.dev`.
 5. Attach the address: in the Worker, go to **Settings**, then **Domains & Routes**, then **Add**, then **Custom Domain**, and enter the address from the table. Because mitchell-pon.com is on Cloudflare, it creates the DNS record for you. If it refuses because the name already has a DNS record, delete that record under the site's **DNS** page and add the domain again.
 
@@ -51,40 +46,32 @@ A Worker lives under **Workers & Pages** at the account level. It only shows up 
 
 After that, every `git push` to `main` rebuilds and updates that site.
 
-## Part 2. The two that need a decision
+The derelict vessel map keeps its site files at the top of the repo, next to tests, scripts and import notes. Its build command (`sh scripts/stage_public.sh`) copies only the site into `public/`, which is what `wrangler.jsonc` serves, and leaves out the manual exclusion list.
 
-**Derelict vessel map.** Its own README says not to publish it yet, because the BoatUS MyCoast data has no confirmed reuse terms. Two ways to go:
+## Part 2. These are proofs of concept
 
-- Keep it off the internet until the terms are settled.
-- Deploy it now, but put it behind Cloudflare Access (Zero Trust, then Access, then Applications) so only people you list can open `boats.mitchell-pon.com`.
+All four projects are shown as **Alpha (preview)** and are meant to show ideas, not finished products. A few things to know:
 
-Its site files sit at the top of the repo next to tests, scripts and import notes, so use this build command to publish only the site:
+- **Derelict vessel map.** The BoatUS MyCoast data does not have confirmed reuse terms. The project page says it is a preview and may be taken down. If the data owner objects, remove the custom domain from the Worker (or put it behind Cloudflare Access) and comment out its line in `LIVE`.
+- **Abandoned vehicle map.** The repo's README lists open items, such as reuse terms for the city data and the default-location spots in San José.
+- **Car maker identifier.** The site is a static rebuild of the original Streamlit app, and both read the same data file. The Streamlit app is still in the repo.
 
-```
-mkdir public && cp -r index.html about.html data.html styles.css favicon.svg js lib fonts data public/ && rm -f public/data/exclude_ids.txt
-```
+## Part 3. Links from the portfolio to the live sites
 
-and this deploy command:
+Every project page has an **Open the live version** button, and it opens the project in a new tab. The addresses come from `LIVE` near the top of `tools/build_site.py`.
 
-```
-npx wrangler deploy --assets ./public --name derelict-vessel-map --compatibility-date 2026-10-09
-```
-
-**Car maker identifier.** It is a Streamlit app, which needs a running Python server, and a Worker with static assets only serves files. To host it on Cloudflare it has to be rebuilt as a static page: the processed data (`data/nhtsa_data.csv`) becomes a JSON file and the charts are drawn in the browser. Until then the portfolio shows its page and a link to the source code, and no live link.
-
-## Part 3. Link the live sites from the portfolio
-
-1. Open `tools/build_site.py` and find `LIVE`.
-2. Remove the `#` from the line of each project whose address now loads. Leave the others commented out.
-3. Run `python3 tools/build_site.py`. Each of those project pages now has an **Open the live version** button.
-4. Statuses all come from `STATUS` near the top of the same file. Change it, or set `status=` on a single project, and run the script again.
-5. Commit and push:
+1. To change or remove a link, edit `LIVE` in `tools/build_site.py`. A line with a `#` in front of it is off, and that project page shows no button.
+2. Run `python3 tools/build_site.py`.
+3. Statuses all come from `STATUS` in the same file. Change it, or set `status=` on a single project, and run the script again.
+4. Commit and push:
 
    ```
    git add .
-   git commit -m "Link live sites"
+   git commit -m "Update live links"
    git push
    ```
+
+The buttons point at the subdomains in the table, so each one shows an error page until its Worker is deployed and its custom domain is attached.
 
 ## Protecting the code
 

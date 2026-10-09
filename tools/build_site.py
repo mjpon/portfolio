@@ -45,14 +45,14 @@ LINE_OF = {
     "ppe-inspection-report": "tools",
 }
 
-# Hosted versions of the projects. Each one is its own Cloudflare Pages project on a
-# mitchell-pon.com subdomain. Once an address loads, remove the "#" from its line, run this
-# script again, and the project page gets an "Open the live version" button.
+# Hosted versions of the projects. Each one is its own Cloudflare Worker on a
+# mitchell-pon.com subdomain. A project in this list gets an "Open the live version" button on its
+# page. To unlink one, put a "#" in front of its line and run this script again.
 LIVE = {
-    # "abandoned-vehicle-map": "https://vehicles.mitchell-pon.com",
-    # "ppe-inspection-report": "https://ppe.mitchell-pon.com",
-    # "car-maker-identifier": "https://cars.mitchell-pon.com",
-    # "derelict-vessel-map": "https://boats.mitchell-pon.com",
+    "abandoned-vehicle-map": "https://vehicles.mitchell-pon.com",
+    "ppe-inspection-report": "https://ppe.mitchell-pon.com",
+    "car-maker-identifier": "https://cars.mitchell-pon.com",
+    "derelict-vessel-map": "https://boats.mitchell-pon.com",
 }
 
 STATUS = "Alpha (preview)"
@@ -107,8 +107,8 @@ P = [
                 "A Python script turns a CSV export into GeoJSON and keeps only an allow-list of fields: report ID, date, place and a link back to the source. Reporter names, vessel names, registration numbers, photos and street addresses are dropped, because some of these boats are people’s homes.",
                 "A list of report IDs can be excluded by hand, each with a comment explaining why. That is how test submissions and duplicates stay out. Tests check that private text never reaches the output. The site itself is static and built on Leaflet.",
             ]),
-            ("Before it goes public", [
-                "The source data does not have confirmed reuse terms yet, so the map is not public until those are settled with the data owner.",
+            ("Preview only", [
+                "The source data does not have confirmed reuse terms yet, so this map is a preview. It may change or be taken down once those are settled with the data owner.",
             ]),
         ],
     ),
@@ -131,17 +131,22 @@ P = [
     ),
     dict(
         slug="car-maker-identifier", name="Car maker identifier",
-        blurb="A Streamlit app for exploring vehicles by manufacturer, redesigned in a timetable style.",
-        lede="A Streamlit app for exploring vehicle data by manufacturer. It was built a while back and has now been redesigned.",
-        made="Python, Streamlit", status=STATUS,
-        extra=[("Source", ("github.com/mjpon/car-maker-identifier", REPO)),
+        blurb="Where the engine, transmission and assembly of new US vehicles come from, charted by manufacturer and model year.",
+        lede="A web page that shows where new US vehicles get their engine, transmission and final assembly. It reads the parts-content labels the government requires and lets you compare manufacturers, countries and model years.",
+        made="Python, HTML, CSS, JavaScript", status=STATUS,
+        extra=[("Data", "NHTSA parts-content reports, model years 2020 to 2026"),
+               ("Source", ("github.com/mjpon/car-maker-identifier", REPO)),
                ("Design reference", DESIGN_RAIL)],
         sections=[
             ("What it does", [
-                "The overview page has filters, headline numbers, rankings and a trend view. Separate pages cover parts content and assembly by manufacturer, including a per-manufacturer breakdown.",
+                "Pick a model year, a manufacturer or a car line, and the page updates its headline numbers and charts: models by manufacturer, assembly country, where engines and transmissions come from, and how much of each vehicle’s parts content is from the US and Canada. A table lists every vehicle, can be sorted, and downloads as a CSV.",
             ]),
-            ("What changed in the redesign", [
-                "The interface now uses a grid, hairline rules and timetable-style rows, with red as the signal color, and it works down to phone width. The code, README and dependencies were cleaned up, and the assembly page now uses corrected assembly data.",
+            ("How it’s built", [
+                "The reports are published as PDFs, so a Python script reads them, cleans up manufacturer names and turns country codes into country names. Another script writes the result as one JSON file. The page is plain HTML, CSS and JavaScript that draws every chart in the browser, with no server and no framework.",
+                "The first version was a Streamlit app, and it is still in the repo.",
+            ]),
+            ("Design", [
+                "The interface uses a grid, hairline rules and timetable-style rows, with red as the signal color, and it works down to phone width.",
             ]),
         ],
     ),
