@@ -73,9 +73,22 @@ Every project page has an **Open the live version** button, and it opens the pro
 
 The buttons point at the subdomains in the table, so each one shows an error page until its Worker is deployed and its custom domain is attached.
 
-## Protecting the code
+## Security
 
-- Anything a browser can load can be read, however it is packaged. Minifying or obfuscating JavaScript only slows a reader down.
+- `site/_headers` sets a strict Content-Security-Policy and other security headers. Cloudflare reads it and applies it to every page. Fonts from Google Fonts are the only outside resource allowed.
+- `.github/workflows/security.yml` runs on every push and pull request, and once a week. It scans the whole git history for committed secrets (gitleaks), checks the headers (`python3 tools/check_headers.py site`) and checks that `site/` still matches what `tools/build_site.py` generates. `codeql.yml` adds GitHub's code scanner, and its reports appear under the Security tab.
+- Dependabot opens pull requests when a pinned action has an update. See `SECURITY.md` for how to report a problem.
+- The other four repos have the same checks. Semgrep takes the place of CodeQL in the private ones, because CodeQL is only free on public repos.
+- Anything a browser can load can be read, however it is packaged. Minifying or obfuscating JavaScript only slows a reader down, so it is not used.
 - Keep secrets out of the repo. Keys and tokens belong in environment variables (each Worker has a **Variables & Secrets** settings page). `.gitignore` already skips `.env` files.
 - Anything that has to stay private needs to run on a server and not in the page, or sit behind Cloudflare Access.
 - `LICENSE` says all rights reserved. On GitHub, a public repo can always be viewed and forked on GitHub itself, whatever the license says. A private repo keeps the source out of sight, and Cloudflare builds from private repos.
+
+### Settings that live in the dashboards
+
+These are not in the code, so they are listed here. Turn them on in Cloudflare for `mitchell-pon.com` and in GitHub for each repo:
+
+- Two-factor sign-in (a passkey or authenticator app) on both accounts.
+- Cloudflare: DNSSEC; **SSL/TLS** then **Edge Certificates** then **Always Use HTTPS** and HSTS; SPF, DMARC and null-MX records, since the domain sends no mail.
+- GitHub: Dependabot alerts, secret scanning with push protection, private vulnerability reporting, and a branch rule on `main`.
+- Once each custom domain works, switch off the `workers.dev` and preview addresses for that Worker.
