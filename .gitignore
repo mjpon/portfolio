@@ -1,0 +1,19 @@
+# Secrets. Never commit these.
+.env
+.env.*
+.dev.vars
+*.pem
+*.key
+
+# Local and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Tooling
+node_modules/
+__pycache__/
+*.pyc
+.wrangler/
+*.log

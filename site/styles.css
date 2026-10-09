@@ -1,0 +1,745 @@
+/*
+  Portfolio styles.
+  Layout: one left-aligned column on a 72rem grid. Projects are stations on
+  four colored lines, listed like a timetable. Each line has its own station
+  shape, so color is never the only signal. Red marks the current page and the
+  main action, and no line uses red.
+*/
+:root {
+  --bg: #eef0f2;
+  --tile: #e3e7ea;
+  --ink: #1b1f23;
+  --ink-2: #4d555e;
+  --rule: #c8ced3;
+  --signal: #d6001c;
+  --on-signal: #ffffff;
+  --maps: #1d63c9;
+  --on-maps: #ffffff;
+  --concepts: #eb9800;
+  --on-concepts: #1b1f23;
+  --apps: #17794a;
+  --on-apps: #ffffff;
+  --tools: #6b3fb5;
+  --on-tools: #ffffff;
+  --font: "Public Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --measure: 62ch;
+  --rail: 2rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --rail: 2.75rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111417;
+    --tile: #1b2025;
+    --ink: #eef0f2;
+    --ink-2: #a5adb5;
+    --rule: #2c333a;
+    --signal: #ff4a57;
+    --on-signal: #111417;
+    --maps: #6aa6ff;
+    --on-maps: #111417;
+    --concepts: #ffc23d;
+    --on-concepts: #111417;
+    --apps: #45d08a;
+    --on-apps: #111417;
+    --tools: #b199ff;
+    --on-tools: #111417;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #111417;
+  --tile: #1b2025;
+  --ink: #eef0f2;
+  --ink-2: #a5adb5;
+  --rule: #2c333a;
+  --signal: #ff4a57;
+  --on-signal: #111417;
+  --maps: #6aa6ff;
+  --on-maps: #111417;
+  --concepts: #ffc23d;
+  --on-concepts: #111417;
+  --apps: #45d08a;
+  --on-apps: #111417;
+  --tools: #b199ff;
+  --on-tools: #111417;
+  color-scheme: dark;
+}
+
+[data-line="maps"] {
+  --line: var(--maps);
+  --on-line: var(--on-maps);
+}
+
+[data-line="concepts"] {
+  --line: var(--concepts);
+  --on-line: var(--on-concepts);
+}
+
+[data-line="apps"] {
+  --line: var(--apps);
+  --on-line: var(--on-apps);
+}
+
+[data-line="tools"] {
+  --line: var(--tools);
+  --on-line: var(--on-tools);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding-inline: var(--gutter);
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1rem/1.55 var(--font);
+}
+
+a {
+  color: var(--ink);
+}
+
+a:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+  top: 0;
+}
+
+.skip:focus {
+  left: var(--gutter);
+  top: 1rem;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.wrap {
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+/* Station shapes */
+.st {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+/* Logo mark: a waterline with three pilings on a flat tile.
+   Swap the tile color with --mark-bg / --mark-fg (e.g. var(--maps) / var(--on-maps)). */
+.logo {
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  --mark-bg: var(--ink);
+  --mark-fg: var(--bg);
+}
+
+.logo .tile {
+  fill: var(--mark-bg);
+}
+
+.logo .glyph {
+  fill: none;
+  stroke: var(--mark-fg);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+/* Line badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding-inline: 0.875rem 1rem;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--on-line);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a.badge {
+  min-height: 2.75rem;
+  padding-inline: 1rem 1.125rem;
+}
+
+a.badge:hover {
+  filter: brightness(0.94);
+}
+
+.badge .st {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: var(--on-line);
+}
+
+.badge .count {
+  font-weight: 400;
+}
+
+/* Header */
+.top {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--ink);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  align-items: stretch;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 0.75rem;
+  margin-bottom: -1px;
+  border-bottom: 3px solid transparent;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  background: var(--tile);
+}
+
+.nav a[aria-current] {
+  border-bottom-color: var(--signal);
+}
+
+/* Hero */
+.hero {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: clamp(2.5rem, 8vw, 5.5rem) clamp(2rem, 5vw, 3.5rem);
+}
+
+.display {
+  max-width: 20ch;
+  margin: 0;
+  font-size: clamp(2.25rem, 6.4vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.display.sm {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  max-width: 24ch;
+}
+
+.lede {
+  max-width: var(--measure);
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.page > .actions {
+  margin: 1.5rem 0 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: 1.5rem;
+  border-radius: 999px;
+  background: var(--signal);
+  color: var(--on-signal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn:hover {
+  filter: brightness(0.92);
+}
+
+/* Secondary button: outlined, with a small icon before the label */
+.btn.ghost {
+  gap: 0.5rem;
+  padding-inline: 1.25rem;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn.ghost:hover {
+  background: var(--tile);
+  filter: none;
+}
+
+.ico {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.textlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 600;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Sections */
+.sec {
+  padding-block: clamp(2rem, 5vw, 3.5rem);
+}
+
+.sec > h2,
+.prose > h2 {
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.prose {
+  margin-top: 2.5rem;
+}
+
+.prose > h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose > p {
+  max-width: var(--measure);
+  margin: 0 0 1rem;
+}
+
+/* Project board: each group is a line, each row a station */
+.board-head {
+  display: none;
+}
+
+.group {
+  margin-bottom: 2.5rem;
+}
+
+.group:last-child {
+  margin-bottom: 0;
+}
+
+.line-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding-block: 1rem 0.75rem;
+  border-top: 4px solid var(--line);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.line-note {
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.board {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr) 1.25rem;
+  grid-template-areas:
+    "rail name chev"
+    "rail made chev"
+    "rail status chev";
+  gap: 0.375rem 1rem;
+  align-items: center;
+  min-height: 4.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--rail) / 2 - 3px);
+  width: 6px;
+  background: var(--line);
+}
+
+.board li:first-child .row::before {
+  top: 50%;
+}
+
+.board li:last-child .row::before {
+  bottom: 50%;
+}
+
+.board li:last-child .row {
+  border-bottom: 1px solid var(--rule);
+}
+
+.row:hover {
+  background: var(--tile);
+  box-shadow: -0.5rem 0 0 var(--tile), 0.5rem 0 0 var(--tile);
+}
+
+.row:hover .st {
+  fill: var(--tile);
+}
+
+.row:focus-visible {
+  outline-offset: -3px;
+}
+
+.stn {
+  grid-area: rail;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+
+.name {
+  grid-area: name;
+  min-width: 0;
+}
+
+.name strong {
+  display: block;
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+.blurb {
+  display: block;
+  max-width: var(--measure);
+  margin-top: 0.125rem;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.made {
+  grid-area: made;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.status {
+  grid-area: status;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--ink-2);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chev {
+  grid-area: chev;
+  align-self: center;
+  justify-self: end;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.3rem;
+  border-top: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  transform: rotate(45deg);
+}
+
+@media (min-width: 48rem) {
+  .board-head,
+  .row {
+    grid-template-columns: var(--rail) minmax(0, 1fr) 15rem 9.5rem 1.25rem;
+    grid-template-areas: "rail name made status chev";
+    gap: 0 1.5rem;
+  }
+
+  .board-head {
+    display: grid;
+    padding-block: 0.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-2);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .board-head > span {
+    font-size: 0.8125rem;
+  }
+
+  .hc {
+    grid-area: chev;
+  }
+
+  .hr {
+    grid-area: rail;
+  }
+}
+
+/* Fact rows */
+.facts {
+  max-width: 48rem;
+  margin: 0;
+  border-top: 2px solid var(--ink);
+}
+
+.frow {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.facts.plain .frow {
+  grid-template-columns: 13rem minmax(0, 1fr);
+}
+
+.frow dt {
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.frow dd {
+  margin: 0;
+}
+
+@media (max-width: 40rem) {
+  .frow,
+  .facts.plain .frow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.125rem;
+  }
+}
+
+/* Draft marker for sections that are still being written */
+.wip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0 0 1.5rem;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.pill.draft {
+  border-style: dashed;
+}
+
+.about {
+  display: grid;
+  gap: 2rem;
+}
+
+.about p {
+  max-width: var(--measure);
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+}
+
+@media (min-width: 48rem) {
+  .about {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 4rem;
+  }
+}
+
+/* Detail pages */
+.page {
+  padding-block: 1.5rem 3rem;
+}
+
+.page > .where {
+  margin: 0.5rem 0 0;
+}
+
+.page > h1 {
+  margin-top: 1rem;
+}
+
+.page > .lede {
+  margin-top: 1.25rem;
+}
+
+.page > .facts {
+  margin-top: 2rem;
+  border-top: 4px solid var(--line);
+}
+
+.notice {
+  max-width: 48rem;
+  margin: 2rem 0 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--rule);
+  background: var(--tile);
+  font-size: 0.9375rem;
+}
+
+.pager {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 3.5rem;
+  border-top: 2px solid var(--ink);
+}
+
+.pager a {
+  display: block;
+  min-height: 4.5rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.pager a:hover {
+  background: var(--tile);
+}
+
+.pager .dir {
+  display: block;
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pager .to {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+@media (min-width: 48rem) {
+  .pager {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .pager .next {
+    text-align: right;
+  }
+}
+
+/* Footer */
+.foot {
+  padding-block: 2rem 3rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.foot p {
+  max-width: var(--measure);
+  margin: 0 0 0.75rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .row,
+  .nav a,
+  .pager a {
+    transition: background-color 0.12s;
+  }
+}
