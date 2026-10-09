@@ -330,24 +330,9 @@ def home_inner(preview):
         + "</section>\n"
         '<section class="sec" id="about">\n<h2>About</h2>\n'
         '<p class="wip"><span class="pill draft">Work in progress</span>'
-        '<span>This section is a draft and will change.</span></p>\n'
-        '<div class="about">\n<div>\n'
-        "<p>I’m a senior software engineer at Roche, where I support Digital Pathology. I’ve spent about five years building services in Java, "
-        "and I like the work where data meets a screen someone reads in a hurry: a map on a phone, a timetable, a checklist.</p>\n"
-        "<p>Since 2022 I’ve worked on a cell and tissue annotation tool used for tumor diagnostics on more than 300,000 tissue samples. "
-        "Much of the job is finding out why something broke. I query PostgreSQL and AWS Aurora, trace behavior in Splunk and Datadog, "
-        "and work with researchers and program managers to separate facts from assumptions. "
-        "I’ve also mentored 40 interns at Roche’s Santa Clara campus and organized career workshops for them.</p>\n"
-        "<p>At work I use AI coding tools, including Copilot and Cursor with Claude, Gemini and GPT, for quick proofs of concept and for "
-        "working through large codebases and datasets.</p>\n"
-        "<p>Before Roche, I studied computer science at UC Santa Cruz, where I was an undergraduate research assistant in the Design Reasoning Lab. "
-        "From 2017 to 2021 I held IT and software internships at Genentech and CyberCSI. I worked on a lab chemical-tracking kiosk, "
-        "a smart-locker system for IT equipment and packages, and an AWS tool that used unsupervised learning to categorize "
-        "800,000 global service tickets and find trends and cost inefficiencies.</p>\n"
-        "<p>Some of these projects began in the U.S. Coast Guard Auxiliary, where I’m a member. I prototype quickly with Claude Code.</p>\n"
-        "</div>\n"
+        "<span>I’m still writing this section.</span></p>\n"
         + about_facts
-        + "</div>\n</section>\n"
+        + "</section>\n"
         '<section class="sec" id="contact">\n<h2>Contact</h2>\n'
         "<!-- Add an email address here as another row if you want one. -->\n"
         + contact
