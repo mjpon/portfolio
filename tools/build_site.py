@@ -15,6 +15,7 @@ CSS_FILE = PROD / "styles.css"
 
 NAME = "Mitchell"
 GITHUB = "https://github.com/mjpon"
+EMAIL = "mitchellpon76@gmail.com"
 LINKEDIN = "https://www.linkedin.com/in/ponm/"
 REPO = "https://github.com/mjpon/car-maker-identifier"
 FONT_URL = "https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;600&display=swap"
@@ -45,8 +46,7 @@ LINE_OF = {
     "ppe-inspection-report": "tools",
 }
 
-# Hosted versions of the projects. Each one is its own Cloudflare Worker on a
-# mitchell-pon.com subdomain. A project in this list gets an "Open the live version" button on its
+# Live versions of the projects. A project in this list gets an "Open the live version" button on its
 # page. To unlink one, put a "#" in front of its line and run this script again.
 LIVE = {
     "abandoned-vehicle-map": "https://vehicles.mitchell-pon.com",
@@ -273,10 +273,18 @@ def row_html(p, preview):
     )
 
 
+def entities(text):
+    # Writes every character as &#NN; so the address is not sitting in the page as plain text.
+    # Browsers show and use it normally, and it needs no script, so the security policy is unaffected.
+    return "".join(f"&#{ord(c)};" for c in text)
+
+
 def facts_html(rows, plain=False):
     out = []
     for k, v in rows:
-        if isinstance(v, tuple):
+        if isinstance(v, tuple) and v[1].startswith("mailto:"):
+            val = f'<a href="mailto:{entities(v[1][7:])}">{entities(v[0])}</a>'
+        elif isinstance(v, tuple):
             val = f'<a href="{a(v[1])}" target="_blank" rel="noopener">{e(v[0])}</a>'
         else:
             val = e(v)
@@ -318,7 +326,8 @@ def home_inner(preview):
         ("Education", "B.S. Computer Science, UC Santa Cruz (2017 to 2020)"),
         ("Outside work", "Long-distance running, dragon boat, hiking"),
     ])
-    contact = facts_html([("GitHub", ("github.com/mjpon", GITHUB)),
+    contact = facts_html([("Email", (EMAIL, "mailto:" + EMAIL)),
+                          ("GitHub", ("github.com/mjpon", GITHUB)),
                           ("LinkedIn", ("linkedin.com/in/ponm", LINKEDIN))])
     return (
         '<a class="skip" href="#main">Skip to content</a>\n'
@@ -344,7 +353,6 @@ def home_inner(preview):
         + about_facts
         + "</section>\n"
         '<section class="sec" id="contact">\n<h2>Contact</h2>\n'
-        "<!-- Add an email address here as another row if you want one. -->\n"
         + contact
         + "</section>\n</main>\n"
         + footer()
@@ -416,8 +424,7 @@ def detail_page(i, preview):
 
 
 def not_found_page():
-    # Cloudflare Pages serves this for any address that does not exist. Without it, Pages treats the
-    # site as a single-page app and shows the home page for every mistyped address.
+    # Served for any address that does not exist. Without it, a mistyped address would show the home page.
     return (
         head(f"Page not found | {NAME}", "That address does not match a page on this site.", "/styles.css", "/")
         + '<a class="skip" href="#main">Skip to content</a>\n'

@@ -1,5 +1,4 @@
 {
-  // Cloudflare Workers with static assets. The name must match the Worker in the dashboard.
   "name": "portfolio",
   // Set this to today's date when you create or move the project
   "compatibility_date": "2026-10-09",
