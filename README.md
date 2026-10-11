@@ -1,6 +1,6 @@
 # Portfolio site
 
-A static portfolio for four projects: the derelict vessel map, the abandoned vehicle map, the car maker identifier and the PPE inspection report. It is plain HTML and CSS, so there is nothing to build before it goes live.
+A static portfolio for five projects: the derelict vessel map, the abandoned vehicle map, the collectible theft map, the car maker identifier and the PPE inspection report. It is plain HTML and CSS, so there is nothing to build before it goes live.
 
 ```
 site/                 The website: pages, styles and images.
@@ -19,7 +19,7 @@ Then open http://localhost:8000.
 
 ## Projects
 
-Each project has its own GitHub repo, and the portfolio only links to them. All four are shown as **Alpha (preview)**. They are proofs of concept, meant to show ideas and not finished products.
+Each project has its own GitHub repo, and the portfolio only links to them. All five are shown as **Alpha (preview)**. They are proofs of concept, meant to show ideas and not finished products.
 
 ## Editing the site
 

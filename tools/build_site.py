@@ -36,12 +36,12 @@ LINES = [
 LINE_BY_KEY = {l["key"]: l for l in LINES}
 
 ORDER = [
-    "derelict-vessel-map", "abandoned-vehicle-map",
+    "derelict-vessel-map", "abandoned-vehicle-map", "card-theft-map",
     "car-maker-identifier",
     "ppe-inspection-report",
 ]
 LINE_OF = {
-    "derelict-vessel-map": "maps", "abandoned-vehicle-map": "maps",
+    "derelict-vessel-map": "maps", "abandoned-vehicle-map": "maps", "card-theft-map": "maps",
     "car-maker-identifier": "apps",
     "ppe-inspection-report": "tools",
 }
@@ -53,6 +53,7 @@ LIVE = {
     "ppe-inspection-report": "https://ppe.mitchell-pon.com",
     "car-maker-identifier": "https://cars.mitchell-pon.com",
     "derelict-vessel-map": "https://boats.mitchell-pon.com",
+    # "card-theft-map": "https://cards.mitchell-pon.com",  # turn on once this address is connected
 }
 
 STATUS = "Alpha (preview)"
@@ -126,6 +127,28 @@ P = [
             ("How it’s built", [
                 "Python scripts turn each city’s 311 export into one shared format and write the squares, neighborhood totals and dots as static files. The site is plain HTML, JavaScript and Leaflet, with no framework and no server.",
                 "Each city records things differently, so the page does not compare cities by their totals. San José’s newer “Vehicle Concerns” category most likely continues the same work after March 2024, but the city does not say so, so it is a separate switch.",
+            ]),
+        ],
+    ),
+    dict(
+        slug="card-theft-map", name="Collectible theft map",
+        blurb="Trading-card and collectible thefts reported in California news, on a map with a dashboard and a police-record check.",
+        lede="A map and dashboard of trading-card and collectible thefts reported in California news, from April 2025 to October 2026. It starts from news stories because no public police dataset records what was stolen.",
+        made="Python, JavaScript, d3", status=STATUS,
+        extra=[("Data", "News reports, cross-checked against Burbank PD and LAPD open data"),
+               ("Coverage", "California, April 2025 to October 2026"),
+               ("Design reference", DESIGN_RAIL)],
+        sections=[
+            ("What it does", [
+                "Each reported theft is pinned at city or neighborhood level, never at an address. A board beside the map lists every incident with its sources. Charts show when and at what time of day it happened, how thieves got in, what they took and the losses reported. Filters cover the type of crime, whether Pokémon was named, and whether a police record matched.",
+                "It began with Pokémon cards and widened to sports cards, other trading card games and collectible toys.",
+            ]),
+            ("How it’s built", [
+                "The incidents are compiled by hand from news stories, one row each, with source links, dates marked as reported or inferred, and a note wherever sources disagree. A Python script turns that spreadsheet into one static page. The basemap is a simplified outline of California’s counties, so the page needs no map-tile service.",
+                "Where a police release or LAPD open data matched an incident’s date and place, it is marked. Those records cannot say what was taken or what it was worth, so they confirm that the crime was reported, not the details.",
+            ]),
+            ("A floor, not a total", [
+                "News favors large, filmed thefts, so this shows how thefts happen better than how many there are. Dollar figures are owner, police or media estimates, and private victims are not named. Counts over time reflect how much was reported as well as how much happened.",
             ]),
         ],
     ),
