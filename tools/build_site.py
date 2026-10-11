@@ -53,7 +53,7 @@ LIVE = {
     "ppe-inspection-report": "https://ppe.mitchell-pon.com",
     "car-maker-identifier": "https://cars.mitchell-pon.com",
     "derelict-vessel-map": "https://boats.mitchell-pon.com",
-    # "card-theft-map": "https://cards.mitchell-pon.com",  # turn on once this address is connected
+    "card-theft-map": "https://cards.mitchell-pon.com",
 }
 
 STATUS = "Alpha (preview)"
