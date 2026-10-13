@@ -1,7 +1,7 @@
 /*
   Portfolio styles.
   Layout: one left-aligned column on a 72rem grid. Projects are stations on
-  four colored lines, listed like a timetable. Each line has its own station
+  colored lines, drawn as a network map and listed like a timetable. Each line has its own station
   shape, so color is never the only signal. Red marks the current page and the
   main action, and no line uses red.
 */
@@ -21,6 +21,7 @@
   --on-apps: #ffffff;
   --tools: #6b3fb5;
   --on-tools: #ffffff;
+  --ahead: 0.22;
   --font: "Public Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
   --gutter: clamp(1rem, 4vw, 2rem);
   --measure: 62ch;
@@ -50,8 +51,14 @@
     --on-apps: #111417;
     --tools: #b199ff;
     --on-tools: #111417;
+    --ahead: 0.4;
     color-scheme: dark;
   }
+}
+
+/* An explicit light choice also keeps scrollbars and form controls light on a dark device. */
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 :root[data-theme="dark"] {
@@ -70,6 +77,7 @@
   --on-apps: #111417;
   --tools: #b199ff;
   --on-tools: #111417;
+  --ahead: 0.4;
   color-scheme: dark;
 }
 
@@ -271,6 +279,100 @@ a.badge:hover {
   border-bottom-color: var(--signal);
 }
 
+.mark {
+  margin-right: auto;
+}
+
+/* Light and dark switch: a knob that slides between a sun and a moon. */
+.theme {
+  --switch-w: 3.25rem;
+  --knob: 1.5rem;
+  position: relative;
+  flex: none;
+  align-self: center;
+  width: var(--switch-w);
+  height: calc(var(--knob) + 6px);
+  margin-left: 0.5rem;
+  padding: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* A larger area to tap than the switch itself. */
+.theme::after {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -0.375rem;
+}
+
+.theme:hover {
+  background: var(--tile);
+}
+
+.theme:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.knob {
+  position: absolute;
+  top: calc(50% - var(--knob) / 2);
+  left: 2px;
+  display: grid;
+  place-items: center;
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.theme[aria-checked="true"] .knob {
+  transform: translateX(calc(var(--switch-w) - var(--knob) - 7px));
+}
+
+.knob .ico {
+  grid-area: 1 / 1;
+  width: calc(var(--knob) * 0.62);
+  height: calc(var(--knob) * 0.62);
+}
+
+.theme[aria-checked="true"] .sun,
+.theme[aria-checked="false"] .moon {
+  opacity: 0;
+}
+
+/* Small phones: tighter navigation so the switch fits, and below that the logo stands alone. */
+@media (max-width: 30rem) {
+  .top {
+    gap: 0.375rem;
+  }
+
+  .nav a {
+    padding-inline: 0.375rem;
+  }
+
+  .theme {
+    --switch-w: 2.75rem;
+    --knob: 1.25rem;
+    margin-left: 0.25rem;
+  }
+}
+
+@media (max-width: 23.5rem) {
+  .mark .word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 /* Hero */
 .hero {
   display: grid;
@@ -367,6 +469,314 @@ a.badge:hover {
   gap: 0.5rem;
 }
 
+/* Network map: every line leaves the home interchange and runs to its projects.
+   Two drawings of the same network: wide from 60rem up, tall below that. */
+.net {
+  margin: 1rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.net > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.net-wide {
+  display: none !important;
+}
+
+.net-tall {
+  max-width: 22rem;
+}
+
+@media (min-width: 60rem) {
+  .net-wide {
+    display: block !important;
+  }
+
+  .net-tall {
+    display: none !important;
+  }
+}
+
+.net figcaption {
+  margin-top: 1.25rem;
+}
+
+.net .route {
+  fill: none;
+  stroke: none;
+}
+
+.net .ln {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.net .hub {
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 3.5;
+}
+
+.net .train {
+  fill: var(--ink);
+  opacity: 0;
+}
+
+.net .hit {
+  fill: transparent;
+}
+
+.net .ring {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  opacity: 0;
+}
+
+.net .stn {
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+}
+
+.net .lbl {
+  fill: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.net .stop {
+  cursor: pointer;
+  outline: none;
+}
+
+.net .stop:hover .lbl {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.net .stop:focus-visible .ring {
+  opacity: 1;
+}
+
+/* Pointing at a line, or at one of its stations, lets the other lines fall back. */
+.net .ln,
+.net .stop {
+  transition: opacity 0.2s;
+}
+
+.net > svg[data-focus] .ln,
+.net > svg[data-focus] .stop {
+  opacity: 0.28;
+}
+
+.net > svg[data-focus="maps"] [data-line="maps"],
+.net > svg[data-focus="apps"] [data-line="apps"],
+.net > svg[data-focus="tools"] [data-line="tools"] {
+  opacity: 1;
+}
+
+/* With scripts on, the map stays hidden until motion.js has set it up to draw itself.
+   If that script never runs, the map shows up anyway after a moment. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .net > svg:not(.ready) {
+    visibility: hidden;
+    animation: net-fallback 0s 2.5s forwards;
+  }
+}
+
+@keyframes net-fallback {
+  to {
+    visibility: visible;
+  }
+}
+
+/* Page line: the home page drawn as a line beside it, with a train that follows the scroll.
+   Wide screens: in the left margin, with stop names. Narrower: a slim line at the right edge.
+   motion.js builds it and sets --p, how far along the line the train is (0 to 1). */
+.pageline {
+  --rail-x: 0.5rem;
+  --rail-w: 4px;
+  --p: 0;
+  position: fixed;
+  top: 5rem;
+  bottom: 1.5rem;
+  right: 0.25rem;
+  z-index: 5;
+  width: 1rem;
+  pointer-events: none;
+}
+
+.pageline-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--rail-x) - var(--rail-w) / 2);
+  width: var(--rail-w);
+  border-radius: var(--rail-w);
+  overflow: hidden;
+}
+
+.pageline-rail .seg {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: var(--line, var(--ink));
+}
+
+.pageline-rail:not(.fill) .seg {
+  opacity: var(--ahead);
+}
+
+/* The stretch the train has covered is drawn in full color. */
+.pageline-rail.fill {
+  clip-path: inset(0 0 calc((1 - var(--p)) * 100%) 0);
+}
+
+.pageline-stop {
+  position: absolute;
+  left: var(--rail-x);
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  transform: translate(-0.5rem, -50%);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  line-height: 1;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.pageline-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.pageline-mark .st {
+  width: 100%;
+  height: 100%;
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+
+/* The start is an interchange, like the hub on the network map. */
+.pageline-stop.start .pageline-mark::before {
+  content: "";
+  width: 0.875rem;
+  height: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+/* Plain stops are ticks off the line, the way transit maps draw them. */
+.pageline-stop.stop .pageline-mark::before {
+  content: "";
+  width: 0.625rem;
+  height: 3px;
+  margin-left: 0.5rem;
+  background: var(--ink);
+}
+
+.pageline-name {
+  display: none;
+  white-space: nowrap;
+}
+
+.pageline-stop.current .pageline-name {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.pageline-stop:hover .pageline-name {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.pageline-train {
+  position: absolute;
+  top: calc(var(--p) * 100%);
+  left: var(--rail-x);
+  width: 7px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--bg);
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 47.99rem) {
+  .pageline {
+    right: 0;
+  }
+
+  .pageline-mark {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .pageline-stop.start .pageline-mark::before {
+    width: 0.625rem;
+    height: 0.375rem;
+  }
+
+  .pageline-stop.stop .pageline-mark::before {
+    width: 0.5rem;
+    margin-left: 0.375rem;
+  }
+
+  .pageline-stop {
+    transform: translate(-0.375rem, -50%);
+  }
+}
+
+/* Wide screens have room in the left margin for the line and its stop names. */
+@media (min-width: 88rem) {
+  .pageline {
+    --rail-x: 0.75rem;
+    --rail-w: 6px;
+    top: 6rem;
+    bottom: 3rem;
+    right: auto;
+    left: calc((100vw - 72rem) / 2 - 7.5rem);
+    width: 6.5rem;
+  }
+
+  .pageline-name {
+    display: block;
+  }
+
+  .pageline-mark {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .pageline-stop {
+    transform: translate(-0.5625rem, -50%);
+  }
+
+  .pageline-train {
+    width: 10px;
+    height: 20px;
+    border-radius: 3px;
+  }
+}
+
 /* Sections */
 .sec {
   padding-block: clamp(2rem, 5vw, 3.5rem);
@@ -401,7 +811,23 @@ a.badge:hover {
 }
 
 .group {
+  position: relative;
   margin-bottom: 2.5rem;
+}
+
+/* "You are here" marker: a red ring that glides along a line's rail to the row
+   being pointed at. motion.js adds it and moves it. */
+.here {
+  position: absolute;
+  top: 0;
+  left: calc(var(--rail) / 2 - 1.125rem);
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 3px solid var(--signal);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .group:last-child {
@@ -730,6 +1156,92 @@ a.badge:hover {
 .foot p {
   max-width: var(--measure);
   margin: 0 0 0.75rem;
+}
+
+/* Moving between pages: a project's name carries over from its row to the heading of its
+   page, in browsers that support cross-page view transitions. Others just load the page. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 0.34s;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* Scale names by their height, so the text grows without being stretched. */
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    height: 100%;
+    width: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    width: 100%;
+    height: auto;
+  }
+
+  /* The old page leaves before the new one arrives, so the two never sit on top of each other.
+     The header is the same on every page, so it stays put. */
+  .top {
+    view-transition-name: top;
+  }
+
+  ::view-transition-old(root) {
+    animation: vt-out 0.14s cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-in 0.22s 0.1s cubic-bezier(0, 0, 0.2, 1) both;
+  }
+}
+
+/* Switching light and dark: the new colors roll down the page from the header.
+   Every part of the page moves as one, so the named transitions above are turned off. */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-switching body * {
+    view-transition-name: none !important;
+  }
+
+  html.theme-switching::view-transition-old(root) {
+    animation: none;
+  }
+
+  html.theme-switching::view-transition-new(root) {
+    animation: theme-roll 0.42s cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .knob {
+    transition: transform 0.3s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  .knob .ico {
+    transition: opacity 0.16s;
+  }
+}
+
+@keyframes theme-roll {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
