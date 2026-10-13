@@ -50,6 +50,7 @@ The home page opens with a network map: every project is a station on its line, 
 - Pointing at a station, or tabbing to it, sends a train to it, and the other lines fall back.
 - Pointing at a line's chip under the map brings that line forward.
 - In the Work list, a red ring rides the rail to the row in use.
+- A line beside the page works as a map of the page itself. Each section is a stop, a train moves down it as you scroll, and through the Work section it takes each project line's color. Wide screens show it in the left margin with stop names; smaller screens show a slim line at the right edge. Clicking a stop jumps to that section.
 - Opening a project carries its name into the project page's heading, in browsers that support cross-page view transitions.
 
 With "reduce motion" turned on, the map shows up finished and nothing travels. The map is drawn by `build_site.py` from the project list, so a new project gets a station when the script runs. Its layout is set in `NET_LAYOUTS`, one for wide screens and one for phones.
