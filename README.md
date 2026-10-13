@@ -1,10 +1,13 @@
 # Portfolio site
 
-A static portfolio for five projects: the derelict vessel map, the abandoned vehicle map, the collectible theft map, the car maker identifier and the PPE inspection report. It is plain HTML and CSS, so there is nothing to build before it goes live.
+A static portfolio for five projects: the derelict vessel map, the abandoned vehicle map, the collectible theft map, the car maker identifier and the PPE inspection report. It is plain HTML, CSS and a little JavaScript, so there is nothing to build before it goes live.
 
 ```
 site/                 The website: pages, styles and images.
+site/motion.js        The home page's animations.
+site/vendor/          A trimmed copy of anime.js, which motion.js uses.
 tools/build_site.py   Optional. Rewrites the pages in site/ from the project list inside it.
+tools/vendor_anime.sh Rebuilds site/vendor/anime.js. Needs Node.
 LICENSE               All rights reserved.
 ```
 
@@ -38,6 +41,19 @@ Everything on the pages comes from `tools/build_site.py`. Edit it, run it, and c
    git commit -m "Update the site"
    git push
    ```
+
+## Motion
+
+The home page opens with a network map: every project is a station on its line, and the lines run out of one interchange. When the page loads, trains lay out each line once. After that, motion only answers what a visitor does:
+
+- Pointing at a station, or tabbing to it, sends a train to it, and the other lines fall back.
+- Pointing at a line's chip under the map brings that line forward.
+- In the Work list, a red ring rides the rail to the row in use.
+- Opening a project carries its name into the project page's heading, in browsers that support cross-page view transitions.
+
+With "reduce motion" turned on, the map shows up finished and nothing travels. The map is drawn by `build_site.py` from the project list, so a new project gets a station when the script runs. Its layout is set in `NET_LAYOUTS`, one for wide screens and one for phones.
+
+The site serves its own copy of anime.js because the security policy only runs scripts from this domain. To update it, change `VERSION` in `tools/vendor_anime.sh` and run it.
 
 ## Security
 

@@ -24,7 +24,8 @@ LOGO = (
     '<rect class="tile" width="36" height="36" rx="3"/>'
     '<path class="glyph" d="M9 18h18M14 13.5v9M18 12v12M22 13.5v9"/></svg>'
 )
-ASSETS = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "logo.svg")
+ASSETS = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "logo.svg", "motion.js",
+          "vendor/anime.js", "vendor/anime-LICENSE.md")
 
 DESIGN_RAIL = "SBB and ÖBB"
 
@@ -206,7 +207,137 @@ def link(path, preview):
     return path + "index.html" if preview else path
 
 
-def head(title, desc, css_href, assets=""):
+# ---------------------------------------------------------------------------
+# Network map for the home page.
+# Every line leaves one interchange (home) and runs to its projects, like a transit
+# diagram. Lines only run at 0, 45 and 90 degrees. There are two drawings of the
+# same network: a wide one, and a tall one for phones. site/motion.js animates them,
+# and without it they are plain links.
+# Each layout gives, per line, the corners of its path. The projects on that line are
+# spaced evenly along the last straight stretch, with the last one at the very end.
+# ---------------------------------------------------------------------------
+NET_LAYOUTS = {
+    "wide": dict(
+        view=(1000, 280), hub=(52, 150), hub_size=(30, 66), font=16,
+        lines={
+            "apps": [(52, 132), (214, 132), (284, 62), (600, 62)],
+            "maps": [(52, 150), (930, 150)],
+            "tools": [(52, 168), (214, 168), (284, 238), (600, 238)],
+        },
+        first={"apps": 600, "maps": 380, "tools": 600},
+        label={"apps": "above", "maps": "below", "tools": "below"},
+    ),
+    "tall": dict(
+        view=(340, 420), hub=(52, 28), hub_size=(66, 30), font=16,
+        lines={
+            "tools": [(70, 28), (70, 56), (110, 96), (110, 112)],
+            "apps": [(52, 28), (52, 140), (110, 198), (110, 214)],
+            "maps": [(34, 28), (34, 394)],
+        },
+        first={"tools": 112, "apps": 214, "maps": 266},
+        label={"apps": "right", "maps": "right", "tools": "right"},
+    ),
+}
+NET_STOP = 26     # size of a station shape, in drawing units
+NET_RADIUS = 14   # how round the corners of a line are
+
+
+def rounded_path(pts, r=NET_RADIUS):
+    """SVG path through the points, with each corner rounded off."""
+    def toward(p, q, d):
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        length = (dx * dx + dy * dy) ** 0.5
+        d = min(d, length / 2)
+        return (p[0] + dx / length * d, p[1] + dy / length * d)
+
+    def f(n):
+        return f"{n:.1f}".rstrip("0").rstrip(".")
+
+    out = [f"M{f(pts[0][0])} {f(pts[0][1])}"]
+    for i in range(1, len(pts) - 1):
+        a_, b_ = toward(pts[i], pts[i - 1], r), toward(pts[i], pts[i + 1], r)
+        out.append(f"L{f(a_[0])} {f(a_[1])}Q{f(pts[i][0])} {f(pts[i][1])} {f(b_[0])} {f(b_[1])}")
+    out.append(f"L{f(pts[-1][0])} {f(pts[-1][1])}")
+    return "".join(out)
+
+
+def net_stops(pts, first, n):
+    """Where n stations sit on the last stretch of a line, and the path up to each one."""
+    (x0, y0), (x1, y1) = pts[-2], pts[-1]
+    horizontal = y0 == y1
+    end = x1 if horizontal else y1
+    spots = []
+    for i in range(n):
+        v = first + (end - first) * i / (n - 1) if n > 1 else end
+        spot = (v, y1) if horizontal else (x1, v)
+        spots.append((spot, pts[:-1] + [spot]))
+    return spots
+
+
+def network_svg(kind, preview):
+    L = NET_LAYOUTS[kind]
+    w, h = L["view"]
+    font = L["font"]
+    lines, routes, stops = [], [], []
+    for line in LINES:
+        key = line["key"]
+        pts = L["lines"][key]
+        items = [p for p in P if p["line"] == key]
+        lines.append(f'<path class="ln" data-line="{key}" d="{rounded_path(pts)}"/>')
+        for i, (p, (spot, route)) in enumerate(zip(items, net_stops(pts, L["first"][key], len(items)))):
+            x, y = spot
+            routes.append(f'<path class="route" data-route="{p["slug"]}" d="{rounded_path(route)}"/>')
+            side = L["label"][key]
+            last = i == len(items) - 1 and len(items) > 1
+            if side == "above":
+                tx, ty, anchor = x, y - 26, "middle"
+            elif side == "below":
+                tx, ty, anchor = x, y + 26 + font * 0.75, "middle"
+                if last:
+                    tx, anchor = x + NET_STOP / 2, "end"
+            else:
+                tx, ty, anchor = x + NET_STOP, y + font * 0.36, "start"
+            s = NET_STOP
+            stops.append(
+                f'<a class="stop" href="{link("work/" + p["slug"] + "/", preview)}" data-line="{key}" '
+                f'data-slug="{p["slug"]}" aria-label="{a(p["name"])}, {a(line["name"])} line">'
+                f'<circle class="hit" cx="{x:g}" cy="{y:g}" r="{s:g}"/>'
+                f'<circle class="ring" cx="{x:g}" cy="{y:g}" r="{s * 0.82:g}"/>'
+                f'<g class="mark" style="transform-origin:{x:g}px {y:g}px">'
+                f'<use class="stn" href="#shape-{line["shape"]}" x="{x - s / 2:g}" y="{y - s / 2:g}" width="{s}" height="{s}"/></g>'
+                f'<text class="lbl" x="{tx:g}" y="{ty:g}" text-anchor="{anchor}" aria-hidden="true">{e(p["name"])}</text>'
+                "</a>"
+            )
+    hx, hy = L["hub"]
+    hw, hh = L["hub_size"]
+    hub = (f'<rect class="hub" x="{hx - hw / 2:g}" y="{hy - hh / 2:g}" width="{hw}" height="{hh}" '
+           f'rx="{min(hw, hh) / 2:g}" style="transform-origin:{hx}px {hy}px"/>')
+    return (
+        f'<svg class="net-{kind}" viewBox="0 0 {w} {h}" role="group" aria-label="Projects by line">'
+        f'<g class="routes" aria-hidden="true">{"".join(routes)}</g>'
+        f'<g class="lns" aria-hidden="true">{"".join(lines)}</g>'
+        f'<g aria-hidden="true">{hub}<rect class="train" x="-13" y="-6" width="26" height="12" rx="3"/></g>'
+        f'<g class="stops">{"".join(stops)}</g>'
+        "</svg>"
+    )
+
+
+def network_html(preview):
+    return (
+        '<figure class="net">\n'
+        + network_svg("wide", preview) + "\n"
+        + network_svg("tall", preview) + "\n"
+        + "<figcaption>" + chips_html() + "</figcaption>\n"
+        + "</figure>\n"
+    )
+
+
+# Marks the page as having scripts before it paints, so the network map can wait for
+# site/motion.js to draw it instead of flashing in finished. Its hash is in site/_headers.
+HEAD_JS = "<script>document.documentElement.classList.add('js')</script>\n"
+
+
+def head(title, desc, css_href, assets="", extra=""):
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n'
         '<meta charset="utf-8">\n'
@@ -221,7 +352,8 @@ def head(title, desc, css_href, assets=""):
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
         f'<link rel="stylesheet" href="{FONT_URL}">\n'
         f'<link rel="stylesheet" href="{css_href}">\n'
-        "</head>\n<body>\n"
+        + extra
+        + "</head>\n<body>\n"
     )
 
 
@@ -289,7 +421,7 @@ def row_html(p, preview):
     return (
         f'<li><a class="row" href="{href}">'
         f'<span class="stn">{st(shape)}</span>'
-        f'<span class="name"><strong>{e(p["name"])}</strong><span class="blurb">{e(p["blurb"])}</span></span>'
+        f'<span class="name"><strong style="view-transition-name:p-{p["slug"]}">{e(p["name"])}</strong><span class="blurb">{e(p["blurb"])}</span></span>'
         f'<span class="made"><span class="sr-only">Made with: </span>{e(p["made"])}</span>'
         f'<span class="status"><span class="sr-only">Status: </span><span class="pill">{e(p["status"])}</span></span>'
         '<span class="chev" aria-hidden="true"></span></a></li>\n'
@@ -364,7 +496,7 @@ def home_inner(preview):
         '  <div class="actions"><a class="btn" href="#work">See the work</a>'
         f'<a class="btn ghost" href="{GITHUB}" target="_blank" rel="noopener">{ico("code")}GitHub</a>'
         f'<a class="btn ghost" href="{LINKEDIN}" target="_blank" rel="noopener">{ico("person")}LinkedIn</a></div>\n'
-        + "  " + chips_html()
+        + network_html(preview)
         + "</section>\n"
         '<section class="sec" id="work">\n<h2>Work</h2>\n'
         + board_head
@@ -381,6 +513,7 @@ def home_inner(preview):
         + footer()
         + "</div>\n"
         + SCROLLSPY
+        + '<script type="module" src="motion.js"></script>\n'
     )
 
 
@@ -433,7 +566,7 @@ def detail_page(i, preview):
         + f'<main id="main" class="page" data-line="{line["key"]}">\n'
         '<a class="textlink back" href="../../#work">All work</a>\n'
         f'<p class="where"><a class="badge" href="../../#line-{line["key"]}">{st(line["shape"])}{e(line["name"])}</a></p>\n'
-        f'<h1 class="display sm">{e(p["name"])}</h1>\n'
+        f'<h1 class="display sm" style="view-transition-name:p-{p["slug"]}">{e(p["name"])}</h1>\n'
         f'<p class="lede">{e(p["lede"])}</p>\n'
         + live
         + facts_html(facts)
@@ -468,7 +601,7 @@ def home_page_prod():
     return (
         head(f"{NAME} | Software engineer",
              "Software engineer who enjoys concepts and building things. Maps, data apps and small tools for boating and public data.",
-             "styles.css")
+             "styles.css", extra=HEAD_JS)
         + home_inner(False)
         + "</body>\n</html>\n"
     )
@@ -481,6 +614,7 @@ def home_fragment_preview(css):
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
         f'<link rel="stylesheet" href="{FONT_URL}">\n'
         f"<style>\n{css}\n</style>\n"
+        + HEAD_JS
         + home_inner(True)
     )
 
@@ -502,6 +636,7 @@ def main():
         PREV.mkdir(parents=True)
         shutil.copy(CSS_FILE, PREV / "styles.css")
         for asset in ASSETS:
+            (PREV / asset).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(PROD / asset, PREV / asset)
         write(PREV / "index.html", home_fragment_preview(css))
         for i, p in enumerate(P):

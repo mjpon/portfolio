@@ -1,7 +1,7 @@
 /*
   Portfolio styles.
   Layout: one left-aligned column on a 72rem grid. Projects are stations on
-  four colored lines, listed like a timetable. Each line has its own station
+  colored lines, drawn as a network map and listed like a timetable. Each line has its own station
   shape, so color is never the only signal. Red marks the current page and the
   main action, and no line uses red.
 */
@@ -367,6 +367,139 @@ a.badge:hover {
   gap: 0.5rem;
 }
 
+/* Network map: every line leaves the home interchange and runs to its projects.
+   Two drawings of the same network: wide from 60rem up, tall below that. */
+.net {
+  margin: 1rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.net > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.net-wide {
+  display: none !important;
+}
+
+.net-tall {
+  max-width: 22rem;
+}
+
+@media (min-width: 60rem) {
+  .net-wide {
+    display: block !important;
+  }
+
+  .net-tall {
+    display: none !important;
+  }
+}
+
+.net figcaption {
+  margin-top: 1.25rem;
+}
+
+.net .route {
+  fill: none;
+  stroke: none;
+}
+
+.net .ln {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.net .hub {
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 3.5;
+}
+
+.net .train {
+  fill: var(--ink);
+  opacity: 0;
+}
+
+.net .hit {
+  fill: transparent;
+}
+
+.net .ring {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  opacity: 0;
+}
+
+.net .stn {
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+}
+
+.net .lbl {
+  fill: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.net .stop {
+  cursor: pointer;
+  outline: none;
+}
+
+.net .stop:hover .lbl {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.net .stop:focus-visible .ring {
+  opacity: 1;
+}
+
+/* Pointing at a line, or at one of its stations, lets the other lines fall back. */
+.net .ln,
+.net .stop {
+  transition: opacity 0.2s;
+}
+
+.net > svg[data-focus] .ln,
+.net > svg[data-focus] .stop {
+  opacity: 0.28;
+}
+
+.net > svg[data-focus="maps"] [data-line="maps"],
+.net > svg[data-focus="apps"] [data-line="apps"],
+.net > svg[data-focus="tools"] [data-line="tools"] {
+  opacity: 1;
+}
+
+/* With scripts on, the map stays hidden until motion.js has set it up to draw itself.
+   If that script never runs, the map shows up anyway after a moment. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .net > svg:not(.ready) {
+    visibility: hidden;
+    animation: net-fallback 0s 2.5s forwards;
+  }
+}
+
+@keyframes net-fallback {
+  to {
+    visibility: visible;
+  }
+}
+
 /* Sections */
 .sec {
   padding-block: clamp(2rem, 5vw, 3.5rem);
@@ -401,7 +534,23 @@ a.badge:hover {
 }
 
 .group {
+  position: relative;
   margin-bottom: 2.5rem;
+}
+
+/* "You are here" marker: a red ring that glides along a line's rail to the row
+   being pointed at. motion.js adds it and moves it. */
+.here {
+  position: absolute;
+  top: 0;
+  left: calc(var(--rail) / 2 - 1.125rem);
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 3px solid var(--signal);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .group:last-child {
@@ -730,6 +879,58 @@ a.badge:hover {
 .foot p {
   max-width: var(--measure);
   margin: 0 0 0.75rem;
+}
+
+/* Moving between pages: a project's name carries over from its row to the heading of its
+   page, in browsers that support cross-page view transitions. Others just load the page. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 0.34s;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* Scale names by their height, so the text grows without being stretched. */
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    height: 100%;
+    width: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    width: 100%;
+    height: auto;
+  }
+
+  /* The old page leaves before the new one arrives, so the two never sit on top of each other.
+     The header is the same on every page, so it stays put. */
+  .top {
+    view-transition-name: top;
+  }
+
+  ::view-transition-old(root) {
+    animation: vt-out 0.14s cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-in 0.22s 0.1s cubic-bezier(0, 0, 0.2, 1) both;
+  }
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
