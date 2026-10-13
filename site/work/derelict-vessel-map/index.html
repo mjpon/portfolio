@@ -13,18 +13,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;600&display=swap">
 <link rel="stylesheet" href="../../styles.css">
+<script>(function(d){d.classList.add('js');try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')d.setAttribute('data-theme',t)}catch(e){}})(document.documentElement)</script>
+<script src="../../theme.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="shape-circle" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/></symbol><symbol id="shape-square" viewBox="0 0 16 16"><rect x="2.75" y="2.75" width="10.5" height="10.5" rx="1"/></symbol><symbol id="shape-triangle" viewBox="0 0 16 16"><path d="M8 2.5 14 13H2z"/></symbol><symbol id="shape-diamond" viewBox="0 0 16 16"><path d="M8 1.75 14.25 8 8 14.25 1.75 8z"/></symbol><symbol id="icon-code" viewBox="0 0 24 24"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8.5" r="2.5"/><path d="M6 8v8M18 11c0 3.5-3 5-8 5.5"/></symbol><symbol id="icon-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="shape-circle" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/></symbol><symbol id="shape-square" viewBox="0 0 16 16"><rect x="2.75" y="2.75" width="10.5" height="10.5" rx="1"/></symbol><symbol id="shape-triangle" viewBox="0 0 16 16"><path d="M8 2.5 14 13H2z"/></symbol><symbol id="shape-diamond" viewBox="0 0 16 16"><path d="M8 1.75 14.25 8 8 14.25 1.75 8z"/></symbol><symbol id="icon-code" viewBox="0 0 24 24"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8.5" r="2.5"/><path d="M6 8v8M18 11c0 3.5-3 5-8 5.5"/></symbol><symbol id="icon-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol><symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol><symbol id="icon-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol></defs></svg>
 <div class="wrap">
 <header class="top">
-  <a class="mark" href="../../"><svg class="logo" viewBox="0 0 36 36" aria-hidden="true" focusable="false"><rect class="tile" width="36" height="36" rx="3"/><path class="glyph" d="M9 18h18M14 13.5v9M18 12v12M22 13.5v9"/></svg>Mitchell</a>
+  <a class="mark" href="../../"><svg class="logo" viewBox="0 0 36 36" aria-hidden="true" focusable="false"><rect class="tile" width="36" height="36" rx="3"/><path class="glyph" d="M9 18h18M14 13.5v9M18 12v12M22 13.5v9"/></svg><span class="word">Mitchell</span></a>
   <nav class="nav" aria-label="Main">
     <a href="../../#work" aria-current="true">Work</a>
     <a href="../../#about">About</a>
     <a href="../../#contact">Contact</a>
   </nav>
+  <button class="theme" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode"><span class="knob"><svg class="ico sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-sun"/></svg><svg class="ico moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-moon"/></svg></span></button>
 </header>
 <main id="main" class="page" data-line="maps">
 <a class="textlink back" href="../../#work">All work</a>

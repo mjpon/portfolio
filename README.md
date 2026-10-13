@@ -5,6 +5,7 @@ A static portfolio for five projects: the derelict vessel map, the abandoned veh
 ```
 site/                 The website: pages, styles and images.
 site/motion.js        The home page's animations.
+site/theme.js         The light and dark switch.
 site/vendor/          A trimmed copy of anime.js, which motion.js uses.
 tools/build_site.py   Optional. Rewrites the pages in site/ from the project list inside it.
 tools/vendor_anime.sh Rebuilds site/vendor/anime.js. Needs Node.
@@ -52,6 +53,8 @@ The home page opens with a network map: every project is a station on its line, 
 - Opening a project carries its name into the project page's heading, in browsers that support cross-page view transitions.
 
 With "reduce motion" turned on, the map shows up finished and nothing travels. The map is drawn by `build_site.py` from the project list, so a new project gets a station when the script runs. Its layout is set in `NET_LAYOUTS`, one for wide screens and one for phones.
+
+The header has a light and dark switch on every page (`site/theme.js`). Until someone uses it, the site follows the device's setting. A choice is saved in that browser and applied before the page paints, and the new colors roll down from the header.
 
 The site serves its own copy of anime.js because the security policy only runs scripts from this domain. To update it, change `VERSION` in `tools/vendor_anime.sh` and run it.
 

@@ -24,7 +24,7 @@ LOGO = (
     '<rect class="tile" width="36" height="36" rx="3"/>'
     '<path class="glyph" d="M9 18h18M14 13.5v9M18 12v12M22 13.5v9"/></svg>'
 )
-ASSETS = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "logo.svg", "motion.js",
+ASSETS = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "logo.svg", "motion.js", "theme.js",
           "vendor/anime.js", "vendor/anime-LICENSE.md")
 
 DESIGN_RAIL = "SBB and ÖBB"
@@ -70,6 +70,10 @@ SPRITE = (
     '<circle cx="18" cy="8.5" r="2.5"/><path d="M6 8v8M18 11c0 3.5-3 5-8 5.5"/></symbol>'
     '<symbol id="icon-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/>'
     '<path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol>'
+    # Sun and moon for the light and dark switch.
+    '<symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/>'
+    '<path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol>'
+    '<symbol id="icon-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol>'
     "</defs></svg>\n"
 )
 
@@ -303,7 +307,7 @@ def network_svg(kind, preview):
                 f'data-slug="{p["slug"]}" aria-label="{a(p["name"])}, {a(line["name"])} line">'
                 f'<circle class="hit" cx="{x:g}" cy="{y:g}" r="{s:g}"/>'
                 f'<circle class="ring" cx="{x:g}" cy="{y:g}" r="{s * 0.82:g}"/>'
-                f'<g class="mark" style="transform-origin:{x:g}px {y:g}px">'
+                f'<g class="sym" style="transform-origin:{x:g}px {y:g}px">'
                 f'<use class="stn" href="#shape-{line["shape"]}" x="{x - s / 2:g}" y="{y - s / 2:g}" width="{s}" height="{s}"/></g>'
                 f'<text class="lbl" x="{tx:g}" y="{ty:g}" text-anchor="{anchor}" aria-hidden="true">{e(p["name"])}</text>'
                 "</a>"
@@ -332,9 +336,11 @@ def network_html(preview):
     )
 
 
-# Marks the page as having scripts before it paints, so the network map can wait for
-# site/motion.js to draw it instead of flashing in finished. Its hash is in site/_headers.
-HEAD_JS = "<script>document.documentElement.classList.add('js')</script>\n"
+# Runs before the page paints. It marks the page as having scripts, so the network map can wait
+# for site/motion.js to draw it, and it applies a saved light or dark choice, so the page never
+# flashes the wrong colors. Its hash is in site/_headers: change one character and update it.
+HEAD_JS = ("<script>(function(d){d.classList.add('js');try{var t=localStorage.getItem('theme');"
+           "if(t==='dark'||t==='light')d.setAttribute('data-theme',t)}catch(e){}})(document.documentElement)</script>\n")
 
 
 def head(title, desc, css_href, assets="", extra=""):
@@ -352,6 +358,8 @@ def head(title, desc, css_href, assets="", extra=""):
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
         f'<link rel="stylesheet" href="{FONT_URL}">\n'
         f'<link rel="stylesheet" href="{css_href}">\n'
+        + HEAD_JS
+        + f'<script src="{assets}theme.js" defer></script>\n'
         + extra
         + "</head>\n<body>\n"
     )
@@ -367,12 +375,19 @@ def header(home, root=None):
     current = "" if root else ' aria-current="true"'
     return (
         '<header class="top">\n'
-        f'  <a class="mark" href="{mark}">{LOGO}{NAME}</a>\n'
+        f'  <a class="mark" href="{mark}">{LOGO}<span class="word">{NAME}</span></a>\n'
         '  <nav class="nav" aria-label="Main">\n'
         f'    <a href="{work}"{current}>Work</a>\n'
         f'    <a href="{about}">About</a>\n'
         f'    <a href="{contact}">Contact</a>\n'
-        "  </nav>\n</header>\n"
+        "  </nav>\n"
+        # Light and dark switch. site/theme.js sets aria-checked and handles clicks.
+        '  <button class="theme" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">'
+        '<span class="knob">'
+        '<svg class="ico sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-sun"/></svg>'
+        '<svg class="ico moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-moon"/></svg>'
+        "</span></button>\n"
+        "</header>\n"
     )
 
 
@@ -601,7 +616,7 @@ def home_page_prod():
     return (
         head(f"{NAME} | Software engineer",
              "Software engineer who enjoys concepts and building things. Maps, data apps and small tools for boating and public data.",
-             "styles.css", extra=HEAD_JS)
+             "styles.css")
         + home_inner(False)
         + "</body>\n</html>\n"
     )
@@ -615,6 +630,7 @@ def home_fragment_preview(css):
         f'<link rel="stylesheet" href="{FONT_URL}">\n'
         f"<style>\n{css}\n</style>\n"
         + HEAD_JS
+        + '<script src="theme.js" defer></script>\n'
         + home_inner(True)
     )
 

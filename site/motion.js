@@ -28,7 +28,7 @@ function drawNetwork(svg) {
   utils.set(drawn, { draw: '0 0' });
   utils.set(hub, { scale: 0 });
   stops.forEach(stop => {
-    utils.set(stop.querySelector('.mark'), { scale: 0 });
+    utils.set(stop.querySelector('.sym'), { scale: 0 });
     utils.set(stop.querySelector('.lbl'), { opacity: 0 });
   });
   svg.classList.add('ready');
@@ -52,7 +52,7 @@ function drawNetwork(svg) {
     stops.filter(s => s.dataset.line === line.dataset.line).forEach(stop => {
       const route = svg.querySelector(`.route[data-route="${stop.dataset.slug}"]`);
       const arrive = start + (route.getTotalLength() / length) * duration;
-      tl.add(stop.querySelector('.mark'), { scale: [0, 1], ease: snappy }, arrive - 40);
+      tl.add(stop.querySelector('.sym'), { scale: [0, 1], ease: snappy }, arrive - 40);
       tl.add(stop.querySelector('.lbl'), { opacity: [0, 1], duration: 320, ease: 'out(2)' }, arrive + 60);
     });
   });
@@ -69,7 +69,7 @@ function wireDispatch(svg) {
     if (fade) fade.pause();
     if (trip) trip.pause();
     const route = svg.querySelector(`.route[data-route="${stop.dataset.slug}"]`);
-    const mark = stop.querySelector('.mark');
+    const mark = stop.querySelector('.sym');
     if (reduced.matches) return;
     utils.set(train, { opacity: 1 });
     trip = animate(train, {
