@@ -65,3 +65,27 @@ The site serves its own copy of anime.js because the security policy only runs s
 - Keep secrets out of the repo. `.gitignore` already skips `.env` files.
 - Anything a browser can load can be read, however it is packaged. Minifying or obfuscating JavaScript only slows a reader down, so it is not used. Anything that has to stay private needs to run on a server and not in the page.
 - `LICENSE` says all rights reserved. A public repo can always be viewed and forked on GitHub itself, whatever the license says.
+
+## Adding a blog post
+
+Posts live in `content/posts/` as Markdown. The generator needs one library, pinned in `requirements.txt`.
+
+```
+pip install -r requirements.txt
+```
+
+Each file is `content/posts/<slug>.md`. Between the `---` lines it needs:
+
+- `title`
+- `date`, as `YYYY-MM-DD`
+- `summary`
+
+`draft` is optional. `draft: true` leaves that post out of the site, the feed and the sitemap. Leave the field off, or set `draft: false`, to publish it.
+
+Then build and commit `site/`:
+
+```
+python3 tools/build_site.py
+git add site/ content/posts/
+git commit -m "Add a blog post"
+```

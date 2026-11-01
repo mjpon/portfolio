@@ -48,6 +48,9 @@ jobs:
       - name: Security headers
         run: python3 tools/check_headers.py site
 
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
       # What is committed in site/ is exactly what gets served, so it must match its source.
       - name: Pages match the generator
         run: |
