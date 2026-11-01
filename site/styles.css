@@ -345,8 +345,9 @@ a.badge:hover {
   opacity: 0;
 }
 
-/* Small phones: tighter navigation so the switch fits, and below 25rem the logo stands alone. */
-@media (max-width: 30rem) {
+/* Small phones: tighter navigation so the switch fits, and below 25.75rem the logo stands alone.
+   31rem and 25.75rem are the measured points where this header stops overflowing. */
+@media (max-width: 31rem) {
   .top {
     gap: 0.375rem;
   }
@@ -362,7 +363,7 @@ a.badge:hover {
   }
 }
 
-@media (max-width: 25rem) {
+@media (max-width: 25.75rem) {
   .mark .word {
     position: absolute;
     width: 1px;
