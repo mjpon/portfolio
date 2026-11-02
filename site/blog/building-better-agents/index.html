@@ -1,0 +1,1468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Building better agents: what I heard at three fall conferences, and what it changes | Mitchell</title>
+<meta name="description" content="Agents made writing code cheap, so checking it is now the expensive part. Every talk I picked was about building the checks around the model, not about waiting for a better model.">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;600&display=swap">
+<link rel="stylesheet" href="../../styles.css">
+<script>(function(d){d.classList.add('js');try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')d.setAttribute('data-theme',t)}catch(e){}})(document.documentElement)</script>
+<script src="../../theme.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="shape-circle" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/></symbol><symbol id="shape-square" viewBox="0 0 16 16"><rect x="2.75" y="2.75" width="10.5" height="10.5" rx="1"/></symbol><symbol id="shape-triangle" viewBox="0 0 16 16"><path d="M8 2.5 14 13H2z"/></symbol><symbol id="shape-diamond" viewBox="0 0 16 16"><path d="M8 1.75 14.25 8 8 14.25 1.75 8z"/></symbol><symbol id="icon-code" viewBox="0 0 24 24"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8.5" r="2.5"/><path d="M6 8v8M18 11c0 3.5-3 5-8 5.5"/></symbol><symbol id="icon-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol><symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol><symbol id="icon-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol></defs></svg>
+<div class="wrap">
+<header class="top">
+  <a class="mark" href="../../"><svg class="logo" viewBox="0 0 36 36" aria-hidden="true" focusable="false"><rect class="tile" width="36" height="36" rx="3"/><path class="glyph" d="M9 18h18M14 13.5v9M18 12v12M22 13.5v9"/></svg><span class="word">Mitchell</span></a>
+  <nav class="nav" aria-label="Main">
+    <a href="../../#work">Work</a>
+    <a href="../../blog/" aria-current="true">Blog</a>
+    <a href="../../#about">About</a>
+    <a href="../../#contact">Contact</a>
+  </nav>
+  <button class="theme" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode"><span class="knob"><svg class="ico sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-sun"/></svg><svg class="ico moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-moon"/></svg></span></button>
+</header>
+<main id="main" class="page">
+<a class="textlink back" href="../../blog/">All posts</a>
+<h1 class="display sm">Building better agents: what I heard at three fall conferences, and what it changes</h1>
+<p class="blog-date"><time datetime="2026-10-31">October 31, 2026</time></p>
+<div class="blog-body">
+<p><em>31 October 2026 · Notes from WeAreDevelopers World Congress NA (San Jose, 24 Sep), CoreWeave Fully Connected (San Francisco, 29 Sep–1 Oct) and AGNTCon + MCPCon NA (San Jose, 22–23 Oct).</em></p>
+<hr />
+<h2>In one line</h2>
+<p>Agents made <em>writing</em> code cheap, so <em>checking</em> it is now the expensive part. Every talk I picked was about building the checks around the model, not about waiting for a better model.</p>
+<h2>TL;DR</h2>
+<ul>
+<li><strong>Review is the new bottleneck.</strong> Block's typical reviewer reads ~3× the lines they did a year ago. HumanLayer's point: nothing yet tells you quickly whether code is <em>maintainable</em>, so for now someone still has to read it.</li>
+<li><strong>Test skills like software.</strong> Larson: 5–10 frozen fixtures, the current and proposed skill side by side, re-run whenever the model changes.</li>
+<li><strong>A reviewer people mute catches nothing.</strong> Block chose precision over recall (88.7% precision, 32.6% recall on ReviewBench): specialists find candidates, a skeptic tries to disprove them, and a judge rechecks the drops.</li>
+<li><strong>Less context is better context.</strong> Drew: four ways context fails, six ways to fix it. An agent that runs long can fixate on one idea; restart it from checked facts, not from a summary of the same mistake.</li>
+<li><strong>Controls belong outside the prompt.</strong> Identity, budget, tool policy and egress should be enforced and logged on every runner, and that includes the denied actions.</li>
+<li><strong>What I'd try next:</strong> three small experiments (§9): one skill eval, one trusted review, one controlled run.</li>
+</ul>
+<hr />
+<h2>The thread connecting the talks</h2>
+<p>Generating code costs almost nothing now, but bad code costs as much as ever. Every talk below is an answer to the question on the right of this picture.</p>
+<pre><code> BEFORE agents                                  AFTER agents
+ ═════════════                                  ════════════
+ writing code   ████████████ expensive          writing code   █ near zero
+ checking code  ████ manageable                 checking code  ████████████ the bottleneck
+ bad code cost  ████████ high                   bad code cost  ████████ still high
+                                                Entire: 5× PRs per week, each 3× larger
+                                                Block: reviewers read ~3× the lines
+</code></pre>
+<p>Many teams already have the pieces: skills, agent workflows for investigation and fixes, CI agents, deterministic checks and run logs. The next step is to make their behavior <strong>measurable</strong>. Can you show which defects a reviewer catches, which actions an agent <em>can't</em> take, and whether a skill still works after a model update?</p>
+<h3>Reading map</h3>
+<p>The talks line up along one agent run, from the rules going in to the failure that gets saved as a test.</p>
+<pre><code> BEFORE            BUILD              RUN                GRADE              LEARN
+ rules go in       what the model     small context,     judges that        every failure
+ first             reads = code       state outside      agree with         becomes a test
+                                      the loop           people
+ ───────────       ───────────        ───────────        ───────────        ───────────
+ §4 HumanLayer     §5 Larson          §7 Drew            §6 Block           §1 NeMo
+   (plan, slice)     (skill evals)      (context)          (reviewer)         (replay)
+ §2 Agentic Drift                     §2 Security        §8 Harbor          §5 Larson
+   (intent)                             (controls)         (judge κ)          (fixtures)
+                                      §3 LillyPod
+                                        (lab notebook)
+        ▲                                                                       ▲
+        └──── guardrails sit OUTSIDE the agent (hooks, gateways, sandboxes) ────┘
+</code></pre>
+<h3>Where each talk lands in a delivery pipeline</h3>
+<p>The same talks, mapped onto the five stages of a typical agent-assisted delivery pipeline. It answers "which part of <em>my</em> setup would this change?"</p>
+<pre><code> INVESTIGATE ──────► PRODUCE ──────────► BUILD ─────────────► DEPLOY ──────────► VERIFY
+ evidence / RCA      fix + tests          CI integration       env gates           E2E evidence
+ ───────────         ───────────          ───────────          ───────────         ───────────
+ §7 Drew             §4 HumanLayer        §5 Larson            §2 Security         §1 NeMo
+  small loadout,      four reviews,        paired skill         sandbox, gateway,   replay with
+  checked handoff     vertical slices,     evals, isolated      allowed + denied    evidence, not
+  instead of a        next-change check    TDD cycles           actions logged      saved text
+  long chat                                                     §3 LillyPod         §6 Block
+                                                                 governed access     precision-first
+                                                                                     reviewer
+      ▲                                                                                  │
+      └─────── every miss becomes a fixture: Run → Observe → Evaluate → Curate → Improve ┘
+                                   (CoreWeave keynote's &quot;compounding loop&quot;)
+</code></pre>
+<h3>Terms used throughout</h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Plain meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Skill</td>
+<td>Reusable instructions and resources for one kind of work</td>
+</tr>
+<tr>
+<td>Harness</td>
+<td>The software around the model: loop, tools, context, checks, lifecycle</td>
+</tr>
+<tr>
+<td>Eval</td>
+<td>A repeatable task plus criteria for judging the agent's behavior, not only its final answer</td>
+</tr>
+<tr>
+<td>Trace</td>
+<td>A record of a run's steps, tool calls, results and timing</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Model Context Protocol, a shared interface for exposing tools to AI apps. An available tool still needs authorization</td>
+</tr>
+<tr>
+<td>Precision / recall</td>
+<td>Share of flagged findings that are real / share of real issues that got flagged</td>
+</tr>
+<tr>
+<td>Tool loadout</td>
+<td>Giving the model only the tools this request needs</td>
+</tr>
+<tr>
+<td>Context inertia</td>
+<td>The agent keeps chasing a hypothesis after the evidence says stop</td>
+</tr>
+<tr>
+<td>Vertical slice</td>
+<td>One thin, working path end to end, built before adding breadth</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>A starting baseline: where a typical agent setup stands</h2>
+<p>Before the talks, I used this checklist on my own team's setup. It works as a quick self-assessment. "Verify" means the question is still open; it doesn't mean the control is absent.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>What many teams have</th>
+<th>Missing, incomplete or to verify</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plan and review</td>
+<td>Design skills, specialist reviewers</td>
+<td>Measured finding quality on representative changes</td>
+</tr>
+<tr>
+<td>Skill evals</td>
+<td>A saved-answer judge, perhaps one small replay suite</td>
+<td>Behavior checks on skill, model and client changes</td>
+</tr>
+<tr>
+<td>Learning</td>
+<td>Run logs, saved failures</td>
+<td>A routine path from reviewed misses to regression fixtures</td>
+</tr>
+<tr>
+<td>Code quality</td>
+<td>Linters, blocking hooks</td>
+<td>Evidence that realistic follow-up changes stay easy</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td>Agent workflows for investigation and fixes, CI agents</td>
+<td>Durable resume, bounded retries, chained CI jobs</td>
+</tr>
+<tr>
+<td>Traceability</td>
+<td>Run logs; personal tracing experiments</td>
+<td>A shared trace linked to the PR and CI run</td>
+</tr>
+<tr>
+<td>Identity and budgets</td>
+<td>Scoped CI permissions, separate credentials</td>
+<td>Verify identity scope and enforced budgets per runner</td>
+</tr>
+<tr>
+<td>Outbound access</td>
+<td>Tool-call guard hooks</td>
+<td>Verify network egress and denied-call evidence on every runner</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What a good skill eval looks like.</strong> This one is adapted from a real eval: one real failure, assertions on the path <em>and</em> the verdict, and one assertion about what the agent must <em>not</em> do.</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;staging-mock-service-404&quot;,
+  &quot;prompt&quot;: &quot;Integration tests on staging get a 404 from the mock service. Why?&quot;,
+  &quot;files&quot;: [&quot;fixtures/staging-mock-service-404&quot;],
+  &quot;assertions&quot;: [
+    &quot;Finds the 404 on all 6 mock-service calls&quot;,
+    &quot;Cites the profile that enables the mock route only in another environment&quot;,
+    &quot;Verdict: staging has no mock setup; run these tests in the integration environment&quot;,
+    &quot;Does not change or restart the environment&quot;
+  ]
+}
+</code></pre>
+<hr />
+<h2>1. What I tried first: scoring agent output (NeMo Agent Toolkit)</h2>
+<p>A small pilot I ran before the conferences.</p>
+<p><strong>Why it matters:</strong> an answer can sound right and still rest on the wrong revision, a skipped tool result or a change nobody approved. A judge that reads only the final text can't see any of that.</p>
+<pre><code> Saved answers ──► NeMo Agent Toolkit ──► Nemotron (judge) ──► Rubric scores
+ 5 replies          Mac runner             self-hosted GPU      text quality +
+ 2 tickets          existing outputs       box via Ollama       judge rationale
+
+ What the judge SAW:     the answer + the rubric
+ What it did NOT see:    tool calls · side effects · the ticket/code/CI evidence
+</code></pre>
+<p><strong>What it produced</strong>. These are quality scores, not accuracy:</p>
+<table>
+<thead>
+<tr>
+<th>Past ticket</th>
+<th>Replies</th>
+<th>Mean score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ticket A</td>
+<td>3</td>
+<td>0.83</td>
+</tr>
+<tr>
+<td>Ticket B</td>
+<td>2</td>
+<td>0.88</td>
+</tr>
+</tbody>
+</table>
+<p><strong>From scoring an answer to replaying the run:</strong></p>
+<pre><code> TODAY: saved-answer scoring              NEXT: whole-run replay
+ ═══════════════════════════              ══════════════════════
+ answer ──► judge ──► score               frozen ticket + revision + logs
+                                                    │
+                                          ┌─────────┴─────────┐
+                                          ▼                   ▼
+                                     agent v1             agent v2
+                                          │                   │
+                                          ▼                   ▼
+                                  tool calls · side effects · answer
+                                          │
+                       deterministic checks (facts, forbidden actions)
+                       + human-calibrated judge (the explanation)
+                       + tokens and elapsed time
+</code></pre>
+<p><strong>What a trustworthy CI answer must show</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Evidence to keep</th>
+<th>Proposed pass check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Failed jobs</td>
+<td>Job status, the relevant log excerpt</td>
+<td>Names the failed job and cites its failure evidence</td>
+</tr>
+<tr>
+<td>Skipped jobs</td>
+<td>Job state and skip reason, when available</td>
+<td>Keeps skips separate from failures; labels missing reasons</td>
+</tr>
+<tr>
+<td>Token ownership</td>
+<td>Authorized ownership record, if available</td>
+<td>Says "unknown" when the evidence is missing</td>
+</tr>
+<tr>
+<td>Agent behavior</td>
+<td>Tool-call trace and final answer</td>
+<td>Shows the evidence was read; links each claim to its source</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Try it:</strong> freeze one representative investigation ticket, including some cases the agent currently gets <em>wrong</em>, and replay the current and proposed agent on it.</p>
+<p><strong>Status:</strong> NVIDIA's docs say NAT "has been deprecated as of October 2026 and will reach end of life (EOL) by end of year 2026" (checked 30 Oct). Keep the lesson, not the dependency.</p>
+<hr />
+<h2>2. Security: controls must follow the agent</h2>
+<p>CrowdStrike breakout (CoreWeave) · The New Security Stack panel and Colleen Lake's <em>Agentic Drift</em> (WeAreDevelopers)</p>
+<p><strong>Why it matters:</strong> a prompt <em>asks</em> an agent to behave. A runtime <em>limits</em> what it can do. A credential within reach of a powerful tool matters more than how the prompt is worded.</p>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>What</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>27 s</td>
+<td>Fastest observed breakout (initial access → lateral movement)</td>
+<td><a href="https://www.crowdstrike.com/en-us/press-releases/2026-crowdstrike-global-threat-report/">CrowdStrike 2026 Global Threat Report</a>, 2025 data</td>
+</tr>
+<tr>
+<td>29 min</td>
+<td>Average eCrime breakout time</td>
+<td>same</td>
+</tr>
+<tr>
+<td>+89%</td>
+<td>Year-over-year activity by AI-enabled adversaries</td>
+<td>same</td>
+</tr>
+<tr>
+<td>92%</td>
+<td>Organizations with an AI-related breach that lacked proper AI access controls</td>
+<td>IBM analysis of the 2026 Cost of a Data Breach Report</td>
+</tr>
+<tr>
+<td>43%</td>
+<td>Organizations reporting incidents that involved unapproved AI</td>
+<td>same; denominators differ</td>
+</tr>
+<tr>
+<td>19%</td>
+<td>Organizations reporting real coordination between AI governance and security</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<p>None of these measure any particular team's agents. They show how fast an attacker moves once a credential leaks.</p>
+<p><strong>The control map</strong>:</p>
+<pre><code> agents              controls, enforced OUTSIDE the prompt            resources
+ ──────              ─────────────────────────────────────           ─────────
+ Test agent   ──►   Identity · Budget · Tool policy · Egress   ──►   Models
+ Review agent ──►                                              ──►   MCP tools
+ RCA agent    ──►                                              ──►   Network
+                    every decision logged, the allowed AND the denied
+</code></pre>
+<p><strong>Where each control lives in a run</strong>:</p>
+<pre><code> BUILD                START               RUN                   RESPOND
+ pin dependencies ──► scope identity ──►  restrict files    ──► stop the run
+ scan secrets         set resource        and network           keep the evidence
+                      limits              access
+       └── tool/MCP interception checks each call · runtime policy limits files, creds, egress ──┘
+</code></pre>
+<p><strong>Containers, hardened images and microVMs protect different things</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Security boundary</th>
+<th>Controls still needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Container</td>
+<td>Shared kernel, process isolation</td>
+<td>Limit privileges, mounts, network and daemon access</td>
+</tr>
+<tr>
+<td>Hardened image</td>
+<td>Smaller software surface, same runtime boundary</td>
+<td>Patch and pin images; runtime controls still apply</td>
+</tr>
+<tr>
+<td>VM / microVM</td>
+<td>Separate guest kernel, hypervisor boundary</td>
+<td>Patch host and guest; scope files, secrets and egress</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What the microVM boundary looks like</strong> (from <a href="https://docs.docker.com/ai/sandboxes/architecture/">Docker's Sandboxes architecture</a>):</p>
+<pre><code> PER-SESSION microVM (own guest kernel)              HOST-SIDE CONTROLS (outside the guest)
+ ┌──────────────────────────────────────┐            ┌──────────────────────────────────────┐
+ │ agent ──► private Docker engine       │ ─────────► │ policy + credential proxy            │
+ │ builds and test containers stay here │            │ (real API keys never enter the VM)   │
+ │ no access to the host Docker socket  │ ─────────► │ MCP gateway                          │
+ └──────────────────────────────────────┘            │ (host MCP servers need their own     │
+            │                                         │  limits)                             │
+            ▼                                         └──────────────────────────────────────┘
+ workspace: prefer a PRIVATE CLONE over a direct host mount
+</code></pre>
+<p>Watch out with Docker Sandboxes: direct mounts write to the host, and deleting the VM doesn't undo those edits. Mounting the host Docker socket, or your whole home folder, into any container is effectively root on the laptop or runner.</p>
+<p><strong>Agentic Drift: keep hold of intent</strong> (Colleen Lake):</p>
+<pre><code> INTENT ─────────► ISOLATE ─────────► VALIDATE ─────────► INTERVENE
+ agree outcome,    branch/worktree,   CI, telemetry,      review exceptions,
+ constraints,      keep it            user feedback       keep required gates
+ stop conditions   reversible
+      ▲                                                        │
+      └──────────── evidence contradicts the plan? replan ─────┘
+</code></pre>
+<p><strong>Try it:</strong> for each place an agent runs (laptop, CI runner, gateway, sandbox), can you show one allowed operation and one denied operation, each with a record you can attribute? It's a cheap verification exercise, and the gaps it finds are the ones that matter.</p>
+<p><strong>Watch/read:</strong> <a href="https://www.wearedevelopers.com/events/world-congress-2026-north-america/sessions/1739-agentic-drift">Agentic Drift</a> · <a href="https://www.wearedevelopers.com/videos/100607-the-new-security-stack">The New Security Stack</a> (may need a WeAreDevelopers account) · <a href="https://coreweave.com/fully-connected-2026/on-demand">CoreWeave on-demand library</a> (lists "Securing AI at Scale: CoreWeave and CrowdStrike").</p>
+<hr />
+<h2>3. LillyPod: make AI fit the scientist</h2>
+<p>Eli Lilly, CoreWeave Fully Connected</p>
+<p><strong>Why it matters:</strong> the scale got the headlines, but the part worth copying is how the platform is organized around the people using it.</p>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>What</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1,016</td>
+<td>NVIDIA Blackwell Ultra GPUs</td>
+<td><a href="https://blogs.nvidia.com/blog/lilly-ai-factory-live/">NVIDIA</a></td>
+</tr>
+<tr>
+<td>9,000+</td>
+<td>Reported petaflops of AI performance</td>
+<td>same</td>
+</tr>
+<tr>
+<td>4 months</td>
+<td>To assemble the system</td>
+<td>same</td>
+</tr>
+<tr>
+<td>~90% / ~10%</td>
+<td>Research vs enterprise usage</td>
+<td>Conference observation</td>
+</tr>
+<tr>
+<td>8 nodes</td>
+<td>Dedicated to agentic coding</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<pre><code> ┌─────────────────────────────────────────────────────┐
+ │ EXPERIENCE  familiar research tools and desktops    │ ◄── scientists work here
+ ├─────────────────────────────────────────────────────┤
+ │ MODELS      governed access + registry; the         │
+ │             platform routes, users don't pick       │
+ ├─────────────────────────────────────────────────────┤
+ │ COMPUTE     scheduled accelerator capacity          │
+ ├─────────────────────────────────────────────────────┤
+ │ DATA        shared high-performance storage         │
+ └─────────────────────────────────────────────────────┘
+   + a &quot;lab notebook&quot; (W&amp;B) for every run: inputs, model version, outputs
+   + keep the HPC experts; learn from the research power users
+</code></pre>
+<p>Routing and governance were still evolving, so this isn't a finished reference architecture.</p>
+<p><strong>Try it:</strong> can someone go from a ticket or PR to the evidence behind an agent's result without stitching together three different histories? You can borrow the operating model without buying the hardware.</p>
+<hr />
+<h2>4. HumanLayer (Dex Horthy): the verification bottleneck</h2>
+<p>AGNTCon Day 1 · <a href="https://www.youtube.com/watch?v=ix1qQK1IvmA">Talk recording, "Fighting Code Slop"</a> (posted by the Agentic AI Foundation under a different title from the program) · <a href="https://www.youtube.com/watch?v=Ib5GBkD555M">Related AI Engineer talk</a> · <a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/wsff.md">Write-up: Why Software Factories Fail</a> · Horthy's articles 1–3: <a href="https://x.com/dexhorthy/status/2080697380379427275">the bottleneck</a>, <a href="https://x.com/dexhorthy/status/2081058573556306030">four reviews</a>, <a href="https://x.com/dexhorthy/status/2081797628552270027">the next change</a> · SlopCodeBench runs: <a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-opus-5-on-slop-code-bench.md">Opus 5</a>, <a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-sol-fable-kimi-on-slop-code-bench.md">Sol/Fable/Kimi</a> · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1291877">Session</a></p>
+<p><strong>Why it matters:</strong> a factory runs at the speed of its slowest box. Agents sped up <em>building</em>, not <em>reviewing</em>.</p>
+<pre><code> vision ─► tracker ─► BUILD ─► tests ─► PR ─► CI ─► HUMAN REVIEW ─► prod ─► users ─► feedback ─┐
+   ▲                   │                                │                                      │
+   │          was: hours–days                    still: hours–days   ◄── the bottleneck moved  │
+   │          now: minutes–hours (agent)                                                       │
+   └───────────────────────────────────────────────────────────────────────────────────────────┘
+ &quot;Lights-off&quot; factory = delete the HUMAN REVIEW box. HumanLayer tried it (July 2025). It didn't hold.
+</code></pre>
+<p><strong>The core idea: maintainability has no fast oracle.</strong> A test tells you in seconds whether code <em>works</em>. Whether it's <em>easy to change</em> only shows up weeks later, when someone gets paged at 3 a.m. That delay is too long to use as a training reward, so models learn "tests pass" and nothing more: <em>"there is no penalty for eroding codebase maintainability"</em> (write-up). Until something can check maintainability quickly, <strong>read the code</strong>.</p>
+<p><strong>The evidence:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Evidence</th>
+<th>What it shows</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SlopCodeBench: the best model at launch scored <strong>14.8%</strong>; newer models only 1–1.5 points higher</td>
+<td>Tests passing ≠ maintainable when requirements keep arriving</td>
+<td>Talk</td>
+</tr>
+<tr>
+<td>Faros AI: <strong>31.3%</strong> of PRs merged with no review, incidents per PR <strong>+242.7%</strong>, bugs per developer <strong>+54%</strong></td>
+<td>Quality signals slipped after teams adopted agents. The author calls it correlation, not proof</td>
+<td>Write-up</td>
+</tr>
+<tr>
+<td>Models got much better at one-off problems, barely better at improving a codebase</td>
+<td>Better models aren't fixing this on their own</td>
+<td>Write-up chart</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Four reviews before a large diff</strong> (the "missing middle" is program design):</p>
+<pre><code> PRODUCT ────────► ARCHITECTURE ────► PROGRAM DESIGN ────► VERTICAL SLICE
+ user pain,        service             types, signatures,    one working path,
+ success signal    boundaries,         call/file changes     try it, review it
+                   data contracts      ▲
+                                       └── &quot;the missing middle&quot;: architecture alone leaves
+                                           many code decisions for the agent to improvise
+ Scale it to the risk. A small, clear fix doesn't need four documents.
+</code></pre>
+<p>The write-up's own number: about <strong>1 hour</strong> of planning up front cut review from <strong>~6 hours to ~20 minutes</strong>. In its words, <em>"30 minutes of planning saves hours of review."</em></p>
+<p><strong>Slice vertically, not by layer:</strong></p>
+<pre><code> HORIZONTAL (how models plan by default)      VERTICAL (what to ask for)
+ ═══════════════════════════════════════      ══════════════════════════
+ 1. all DB changes                             1. one feature: DB → API → UI, working
+ 2. all API changes                            2. next feature: DB → API → UI, working
+ 3. all UI changes                             3. ...
+ nothing works until step 3                    each step can be run, tested, redirected
+</code></pre>
+<p><strong>What happens on the next change?</strong>. Horthy's small SlopCodeBench run added requirements to the same codebase over 8 checkpoints. Complexity rose for all three models plotted. Treat these as signals, not a full measure of maintainability.</p>
+<p><img alt="SlopCodeBench circuit_eval, checkpoints 1–8: mean cyclomatic complexity (left) and duplicated lines as % of source (right) for Opus 4.8, Sonnet 5 and Opus 5. From Horthy's article 3." src="images/humanlayer-complexity.jpg" /></p>
+<p>What the figure shows, read from its own labels:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Mean cyclomatic complexity, ck1 → ck8</th>
+<th>Duplicated lines, ck1 → ck8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Opus 4.8</td>
+<td>~4.9 → ~8.3 ("goes up 70%")</td>
+<td>~4.5% → ~17% ("nearly quadruples")</td>
+</tr>
+<tr>
+<td>Sonnet 5</td>
+<td>~3.8 → ~4.7</td>
+<td>peaks ~20% at ck4–5, ends ~11%</td>
+</tr>
+<tr>
+<td>Opus 5</td>
+<td>~2.4 → ~2.6</td>
+<td>~11.5% → ~9%</td>
+</tr>
+</tbody>
+</table>
+<p>Horthy also ran a TypeScript slop linter over the agents' code: <strong>174.88 and 178.88</strong> findings per 1,000 lines, against <strong>15.06</strong> in HumanLayer's own monorepo, about <strong>11.6–11.9×</strong>. That baseline is not human-written code. It is their <em>"99%-AI-generated-but-also-carefully-reviewed"</em> repo, so the gap is careful review, not human vs AI (<a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-opus-5-on-slop-code-bench.md">benchmark write-up</a>). He built the 76-rule TypeScript detector set himself and flags that its parity with SlopCodeBench's Python rules is unverified. Both are small runs.</p>
+<p><strong>His practices, and what they could look like day to day:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>What he said</th>
+<th>What it could look like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plan before you build</td>
+<td>Expected pain = P(you'll have to change it) × how painful the change is. Skip cheap decisions</td>
+<td>Design docs scaled to the risk of the change</td>
+</tr>
+<tr>
+<td>Align visually</td>
+<td><a href="https://www.humanlayer.com/blog/show-me-skill">show-me</a>: no "walls of agentic paragraphs"</td>
+<td>Diagrams and tables in plans, not prose</td>
+</tr>
+<tr>
+<td>Give agents back pressure</td>
+<td>"Give them a browser. Let them run the app. Let them use curl."</td>
+<td>Browser automation, local test runs, linters the agent can call</td>
+</tr>
+<tr>
+<td>Feed user feedback in</td>
+<td>A 3 a.m. page should "come with the PR the agent thinks will fix it"</td>
+<td>Route alerts into a bug-fix agent that opens a draft PR</td>
+</tr>
+<tr>
+<td>A loop = forward + back pressure</td>
+<td>A trigger with no feedback is a slop generator on a timer</td>
+<td>Schedule agents only alongside a feedback signal (tests, hooks, review)</td>
+</tr>
+<tr>
+<td>Compound</td>
+<td>"Analyze the sessions of your team"</td>
+<td>Mine past agent sessions for repeated mistakes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>His target:</strong> work within the model's limits and aim for <strong>2–3× faster with the quality kept</strong>, not 10–100× faster.</p>
+<p><strong>Try it:</strong> for the next sizeable agent-built change, can the reviewer approve the shapes (contracts, types, file plan) and a thin slice <em>before</em> the agent builds the rest? Then add one realistic follow-up requirement and see whether the change fits the design or needs copied logic.</p>
+<hr />
+<h2>5. Michael Larson: ship skills like software</h2>
+<p>AGNTCon Day 2 · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1256939">Session</a> · <a href="https://sessionize.com/download/iglaflez~WVwsaBMFSGUwjtjhQq4vPK.pdf~shipping_agent_skills_safely1.pdf">Original slides (PDF)</a> · <a href="https://github.com/mrlarson2007/copilot-tdd-harness">TDD harness</a></p>
+<p><strong>Why it matters:</strong> skills spread like helpful notes, but they behave like code. skills.sh showed <strong>3.9M</strong> installs of <code>find-skills</code> (15 Oct snapshot). Larson named three problems:</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>What it looks like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"It worked once"</td>
+<td>It passed once, by luck, and nobody re-ran it</td>
+</tr>
+<tr>
+<td>Malicious attacks</td>
+<td>Malware disguised as setup steps; encrypted archives that slip past content scans</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Every untested revision is paid for in tokens and in review time</td>
+</tr>
+</tbody>
+</table>
+<p>His fix: <strong>treat skills like software.</strong></p>
+<pre><code> VERSION ──────► EVALUATE ──────► REVIEW ──────► RELEASE
+ track changes   paired evals     scan + human   distribute like a package
+                 in CI            review         (APM, skills.sh / skills CLI)
+</code></pre>
+<p><strong>Setting up evals</strong> (his recipe):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Collect 5–10 tasks plus known failure modes</td>
+<td>Small enough to re-run cheaply</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Write deterministic assertions</td>
+<td>Pass/fail with no judge involved</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Compare the current and proposed skill in CI</td>
+<td>Shows whether v2 is <em>better</em>, not just whether it runs</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Re-run when the model changes</td>
+<td>The model can improve without the skill, which can turn the skill into dead weight</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Add adversarial cases</td>
+<td>Skills carry attacks too</td>
+</tr>
+</tbody>
+</table>
+<p><strong>A paired eval</strong>:</p>
+<pre><code> fixture repo (seeded: off-by-one + missing null check)
+        ├──► skill v1 (current)  ──┐
+        │                          ├──► finds known defects? · avoids invented ones? · leaves files intact?
+        └──► skill v2 (proposed) ──┘
+        repeat on every skill change, model change and agent-client change
+</code></pre>
+<p><strong>The TDD harness: evidence is part of the contract</strong>:</p>
+<pre><code> ┌───────────────────────┐   delegates ONE cycle   ┌──────────────────────────────┐
+ │ tdd (planner)         │ ──────────────────────► │ tdd-cycle-runner             │
+ │ picks one behavior    │ ◄────────────────────── │ own context; returns a JSON  │
+ └───────────────────────┘    JSON contract back   │ contract: code, tests, diff, │
+                                                   │ commit evidence              │
+                                                   └──────────────────────────────┘
+ Promptfoo runs each case in a DISPOSABLE fixture repo · Jev grades the evidence from each phase
+</code></pre>
+<p><strong>Jev's real numbers</strong> from one recorded RED-phase call (Larson's slide 12):</p>
+<table>
+<thead>
+<tr>
+<th>RED judgment</th>
+<th>Jev result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Focused test</td>
+<td>1.95 / 2</td>
+</tr>
+<tr>
+<td>Intended failure</td>
+<td>0.96 P(yes)</td>
+</tr>
+<tr>
+<td>Scope preserved</td>
+<td>0.96 P(yes)</td>
+</tr>
+<tr>
+<td>No RED commit</td>
+<td>0.91 P(yes)</td>
+</tr>
+</tbody>
+</table>
+<p>The call took 222 ms. Total Jev spend across all his runs: <strong>$0.01</strong>. One slide line matters a lot: <strong>"Promptfoo records scores. CI checks completion. No pass thresholds."</strong> Making a score <em>block</em> a release would be an extension, not his demo. The demo's "commit your changes" check is specific to that task, not a general rule.</p>
+<p><strong>Two more slides worth repeating:</strong> portability needs testing (a skill that assumes a tool named <code>Bash</code> can break on another agent with a different shell or approval model), and checking skills for attacks takes three steps: <strong>scan → review → sandbox</strong>.</p>
+<p><strong>His challenge to the room:</strong> <em>add an eval to one skill you're sharing.</em></p>
+<p><strong>Try it:</strong> pick one high-traffic skill, freeze 5–10 fixtures from real misses plus one adversarial case, and re-run them on every skill, model or client change. When a case fails, check the fixture and the harness before blaming the model.</p>
+<hr />
+<h2>6. Block (Joah Gerstenberg): Cut the Noise</h2>
+<p>AGNTCon Day 1 · <a href="https://joahg.dev/cut-the-noise/">Slides with sources</a> · <a href="https://sessionize.com/download/ibtatyec~fYYKmmxxU1W8LHdNvnjTZJ.pdf~cut-the-noise-joah-gerstenberg-agntcon-2026-1.pdf">Slide PDF</a> · <a href="https://github.com/block/review">block/review</a> · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1247706">Session</a></p>
+<p><strong>Why it matters:</strong> if there's too much code for people to read all of it, an automated reviewer has to be one people <em>listen to</em>. Block's first reviewer was noisy enough that coworkers deleted its comments, so Block rebuilt it. Slide title: <strong>"A reviewer that's muted catches nothing."</strong></p>
+<pre><code> OLD FACTORY                                   NEW FACTORY
+ ═══════════                                   ═══════════
+ writing ≈ reviewing (balanced, slow)          agents flood review inboxes
+ engineers learn from each other               typical Block reviewer: ~3× the lines of a year ago
+ through review                                review shrinks into a &quot;ritual of trust&quot;
+                     &quot;Review became the new rate limit.&quot;
+</code></pre>
+<p><strong>Anchor every finding to the customer.</strong> The code was never the goal; the experience is. Could this change <strong>double-charge</strong> someone? A finding needs a trigger, a code path and a consequence.</p>
+<p><strong>Four measurements, because any one of them alone can be gamed:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Metric</th>
+<th>Question</th>
+<th>Gamed alone by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Offline</td>
+<td>Precision</td>
+<td>Of what it flagged, how much was real?</td>
+<td>Saying almost nothing</td>
+</tr>
+<tr>
+<td>Offline</td>
+<td>Recall</td>
+<td>Of the known defects, how many did it find?</td>
+<td>Flagging everything</td>
+</tr>
+<tr>
+<td>Online</td>
+<td>Address rate</td>
+<td>Do engineers act on it?</td>
+<td>Only making easy, agreeable findings</td>
+</tr>
+<tr>
+<td>Online</td>
+<td>Post-merge fix rate</td>
+<td>Did acting on its advice cause harm?</td>
+<td>(This one checks the other three)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The priority call: precision over recall.</strong> <em>"A useful reviewer stays quiet when it has nothing worth saying."</em> As false positives fell, Block's address rate went back up.</p>
+<p><strong>The architecture: more reviewers for recall, more layers for precision</strong>:</p>
+<pre><code> ┌───────────────────────┐
+ │ Behavior &amp; contracts  │──┐
+ ├───────────────────────┤  │ candidates  ┌──────────────────────────┐  kept   ┌──────────┐
+ │ Reliability &amp; ops     │──┼───────────► │ COORDINATOR              │───────► │ PR       │
+ ├───────────────────────┤  │             │ merges duplicates, tries │         │ comments │
+ │ Security &amp; trust      │──┘             │ to DISPROVE each one     │         └──────────┘
+ └───────────────────────┘                └────────────┬─────────────┘              ▲
+  each lens reads the WHOLE change          dropped    ▼                            │
+                                          ┌──────────────────────────┐   restored   │
+                                          │ JUDGE (different model)  │──────────────┘
+                                          │ re-checks the DROPS      │
+                                          └──────────────────────────┘
+ Delivered by default: P0–P2 findings at confidence ≥ 0.8 (block/review README)
+</code></pre>
+<p><strong>Results on ReviewBench</strong> (grounded = matches a labelled known issue):</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>block/review</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grounded precision</td>
+<td><strong>88.7%</strong></td>
+</tr>
+<tr>
+<td>Grounded recall</td>
+<td><strong>32.6%</strong></td>
+</tr>
+<tr>
+<td>High-severity recall (separate subset)</td>
+<td>50%</td>
+</tr>
+<tr>
+<td>For comparison: Copilot grounded recall at ReviewBench launch</td>
+<td>26%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Combine reviewers instead of crowning one.</strong> Block's reviewer and another reviewer overlapped on only <strong>22%</strong> of findings. Each model and lens has different blind spots.</p>
+<p><strong>Route human attention by risk.</strong> He cites Meta's RADAR: <em>"A new test and a ledgering-contract change should not require the same treatment."</em> At Block, people still read the code for:</p>
+<pre><code> infrastructure · public claims · SOX compliance · money movement · PII
+</code></pre>
+<p>Past review comments make good <strong>measuring sticks</strong> (labels to grade the reviewer against). They're poor <strong>ingredients</strong>: a comment records a conclusion, not the reasoning behind it, and feeding comments back in is what made Block's first reviewer noisier.</p>
+<p><strong>What the job becomes:</strong> align and contain → get review <em>before</em> the code exists (Buzz, CoPlan: shared planning sessions) → bring coworkers in while the approach is still forming.</p>
+<p><strong>Compared with the PR reviewer I run:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Cut the Noise</th>
+<th>My reviewer (Oct 2026)</th>
+<th>Smallest step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coordinator must disprove each finding with evidence</td>
+<td>Evidence checks exist ✔</td>
+<td>Log every dropped finding with its reason</td>
+</tr>
+<tr>
+<td>Three lenses + a judge on a different model</td>
+<td>Single pass ✗</td>
+<td>Add one second lens; measure overlap</td>
+</tr>
+<tr>
+<td>Precision bar before posting</td>
+<td>I approve each post</td>
+<td>Count the drafts I delete: that's a precision measure</td>
+</tr>
+<tr>
+<td>Address rate, post-merge fix rate</td>
+<td>Not measured ✗</td>
+<td>Count which posted findings authors acted on</td>
+</tr>
+<tr>
+<td>Risk routing</td>
+<td>Same depth for every PR</td>
+<td>Tag PRs touching auth, database migrations or customer data for a deeper pass</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Drew Breunig: how contexts fail, and how to fix them</h2>
+<p>AGNTCon Day 2 · <strong><a href="https://www.dbreunig.com/2026/10/24/the-state-of-context-engineering.html">Talk write-up: The State of Context Engineering</a></strong> (24 Oct, ~40 slides) · <a href="https://www.dbreunig.com/2026/10/14/context-inertia.html">Context Inertia</a> · Background: <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">How Contexts Fail</a>, <a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">How to Fix Your Context</a> · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1257835">Session</a></p>
+<p><strong>Why it matters:</strong> in 2024 the pitch was that million-token windows solve everything ("RAG is dead"). In practice, <em>long contexts fit more information <strong>and more errors</strong></em>, and agents run in exactly those conditions: many tools, many turns, long runs.</p>
+<p><strong>Four ways context goes wrong</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What goes wrong</th>
+<th>Talk example</th>
+<th>What to watch for in your agents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Poisoning</td>
+<td>A false fact keeps being reused</td>
+<td>Gemini chased <strong>tea</strong> (FireRed) in a game that needs <strong>lemonade</strong> (Red)</td>
+<td>An unverified RCA guess becomes "known" in the journal</td>
+</tr>
+<tr>
+<td>Distraction</td>
+<td>History crowds out fresh reasoning</td>
+<td>Past ~100K tokens Gemini repeated old actions instead of planning</td>
+<td>The same failed diagnostic, rerun</td>
+</tr>
+<tr>
+<td>Confusion</td>
+<td>Irrelevant context drives the choice</td>
+<td>A small model failed with 46 tools and succeeded with 19</td>
+<td>Too many skills hide the right one</td>
+</tr>
+<tr>
+<td>Clash</td>
+<td>Instructions or facts disagree</td>
+<td>Contradictory examples override the instruction (below)</td>
+<td>Old environment rules sitting beside new ones</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Chat history can override instructions</strong> (Camassa &amp; Shiller, <a href="https://arxiv.org/abs/2605.20382"><em>Do as I Say, Not as I Do</em></a>):</p>
+<pre><code> system:   &quot;Answer in Russian.&quot;
+ history:  turn 1 (French) · turn 2 (French) · … · turn N (French)   ◄── hardcoded, contradicting
+ question: about a violin
+ measure:  does the reply still follow &quot;Russian&quot;?
+
+ contradictory turns  N = 1 ─────────────────────────────► 50
+ Claude Opus 4.6           0.98 ───────────────────────────► 0.13
+ Gemma 3 12B               below half after only a few turns       (13 models tested)
+</code></pre>
+<p><img alt="Camassa &amp; Shiller: instruction-following rate (1.0 = always follows the instruction) for 13 models as contradictory turns N go from 1 to 50. Task-based panel." src="images/context-heatmap.jpg" /></p>
+<p>A few rows read straight off the heatmap (the paper's columns are 1, 2, 3, 4, 6, 8, 11, 16, 22, 31, 43, 50):</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>N = 1</th>
+<th>4</th>
+<th>8</th>
+<th>16</th>
+<th>31</th>
+<th>50</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 4.6 Opus</td>
+<td>0.98</td>
+<td>0.98</td>
+<td>0.91</td>
+<td>0.69</td>
+<td>0.38</td>
+<td>0.13</td>
+<td>Holds until ~8, then slides</td>
+</tr>
+<tr>
+<td>Claude 4.6 Sonnet</td>
+<td>0.90</td>
+<td>0.95</td>
+<td>0.74</td>
+<td>0.51</td>
+<td>0.29</td>
+<td>0.15</td>
+<td>Same shape, earlier</td>
+</tr>
+<tr>
+<td>GPT-5.2</td>
+<td>0.66</td>
+<td>0.60</td>
+<td>0.59</td>
+<td>0.58</td>
+<td>0.50</td>
+<td>0.48</td>
+<td>Never great, never collapses</td>
+</tr>
+<tr>
+<td>Gemma-3 12B</td>
+<td>0.98</td>
+<td>0.43</td>
+<td>0.26</td>
+<td>0.16</td>
+<td>0.08</td>
+<td>0.01</td>
+<td>Below half by N = 3</td>
+</tr>
+<tr>
+<td>Hermes-4 70B</td>
+<td>0.39</td>
+<td>0.02</td>
+<td>0.01</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.01</td>
+<td>0.06 at N = 2</td>
+</tr>
+</tbody>
+</table>
+<p>The takeaway is the <em>direction</em>: every model drifts toward the history once there's enough of it. "Stop doing X" typed into a long session competes with every turn that did X.</p>
+<p>This is a controlled experiment, not a universal limit on chat length. It shows that repeated examples can outweigh an explicit instruction. Drew's write-up files it under <em>distraction</em>; I'd have put it under <em>clash</em>.</p>
+<p><strong>The Pokémon harness mattered</strong>:</p>
+<pre><code> game RAM ──► harness extracts structured state ──► Gemini 2.5 ──► navigation + puzzle tools
+              (Gemini struggled with pixel text)          │
+                                                          ▼
+                                     scratchpad memory ── wrong &quot;find tea&quot; goal survived summarization
+ Result: playing from structured state was &quot;roughly as good as&quot; playing with vision
+</code></pre>
+<p><img alt="The Gemini 2.5 Pokémon harness: game RAM → structured state → Gemini, with navigation and puzzle tools and a scratchpad memory." src="images/pokemon-harness.jpg" /></p>
+<p>A concise memory is still wrong if the fact inside it is wrong. <strong>Check facts before saving them as context.</strong> Sources: <a href="https://www.dbreunig.com/2025/06/17/an-agentic-case-study-playing-pok%C3%A9mon-with-gemini.html">Drew's Pokémon case study</a> · <a href="https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf">Gemini 2.5 technical report</a>.</p>
+<p><strong>Six tactics, three jobs</strong>:</p>
+<pre><code> SELECT                       SEPARATE                       REFRESH
+ augmentation (RAG, skills)   quarantine (fresh subagent)    pruning (drop irrelevant)
+ tool loadout                 offloading (files, DB)         summarization (compaction)
+</code></pre>
+<p><strong>Tool loadout, as demoed</strong> (DSPy):</p>
+<pre><code> request ──► small model (Jev) scores every tool: &quot;will the agent call it?&quot;
+                 │ keeps top k = 8 (a demo setting, not a rule)
+                 ▼
+             larger model runs the agent with ONLY those tools
+ Selecting a tool ≠ authorizing it. Keep a governed way to add a tool that got filtered out.
+</code></pre>
+<p>His enterprise example loaded <strong>~600 skills per engineer</strong>. My own setup puts ~160 skill descriptions into every session: the same problem at a smaller scale.</p>
+<p><strong>The arc:</strong></p>
+<pre><code> prompt engineering (2023) ──► context engineering (2025) ──► harness engineering (2026)
+   words for one call            assemble context dynamically    move that work into code
+                 &quot;LLM output is the product of context &amp; weights&quot;
+</code></pre>
+<p><strong>Persistent agents have a persistence problem</strong>. METR time horizons: GPT-5 <strong>3.4 h</strong>, Gemini 3.1 <strong>6.4 h</strong>, Opus 4.6 <strong>12.0 h</strong>. Longer runs bring new failures:</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>What happens</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fighting the weights</td>
+<td>Asking for something the model was trained against</td>
+<td>Claude Code's system prompt repeats its parallel-tool instructions (7×, 4×, 2×, 3×)</td>
+</tr>
+<tr>
+<td>Context inertia</td>
+<td>Fixates on one hypothesis and won't back off</td>
+<td>A Qwen agent spent hours on package versions; the real issue was an incompatible API endpoint</td>
+</tr>
+<tr>
+<td>Forgetting helps</td>
+<td>Dropping context beats keeping it</td>
+<td>Memento ran until a fixed timeout (1.5 h in one experiment), wrote a short note, then restarted fresh; Fork-and-Flush and Tan et al. below</td>
+</tr>
+<tr>
+<td>Dawdling</td>
+<td>A long-running agent stops doing work but keeps talking</td>
+<td>A CORAL agent found its last improvement at 231M tokens; of its final 1,500 turns, 98% made no tool call (Drew's <a href="https://www.dbreunig.com/2026/10/14/context-inertia.html">Context Inertia</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>AHC014 (AtCoder Heuristic Contest), best mean score</strong> (<em>Fork-and-Flush</em>, Cai &amp; Ziakas, as presented in Drew's talk; v2 wrongly credited these to the Tan paper):</p>
+<table>
+<thead>
+<tr>
+<th>Setup</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Team of 4 <strong>with forgetting</strong></td>
+<td><strong>1,144,695</strong></td>
+</tr>
+<tr>
+<td>4 parallel agents</td>
+<td>1,007,073</td>
+</tr>
+<tr>
+<td>1 agent</td>
+<td>961,136</td>
+</tr>
+</tbody>
+</table>
+<p>This is a task score on one contest problem, not general accuracy. It doesn't establish a universal reset interval.</p>
+<p><strong>The slide-17 figure is a different paper</strong> (Tan et al., <a href="https://arxiv.org/abs/2610.20563"><em>Scaling Discovery Requires Forgetting</em></a>), on the same contest:</p>
+<p><img alt="Tan et al.: AHC014 score vs total dollars spent for 1 agent, 4 parallel agents and a team of 4. After the first 30 proposals per agent, &quot;Forget&quot; (blue) restarts from the best work and &quot;Continue&quot; (grey) keeps the history." src="images/context-forgetting.jpg" /></p>
+<pre><code> first 30 proposals ──┬──► CONTINUE: keep the whole history   → &lt; 2% more over the next 30
+                      └──► FORGET:   keep the best artifact,  → 4.5–9.2% more over the next 30
+                                     drop the conversation
+ In all three setups the blue (Forget) line peaks higher than the grey (Continue) line.
+</code></pre>
+<p>The paper's abstract reports up to 15% over parallel agents and up to 39% over a single agent. Each panel has its own score scale (roughly 0.8M–1.1M), so read the gap, not the absolute numbers.</p>
+<p><strong>"Our solutions move the problem":</strong></p>
+<table>
+<thead>
+<tr>
+<th>Fix</th>
+<th>The problem it creates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Longer context windows</td>
+<td>Let in more bad information</td>
+</tr>
+<tr>
+<td>Agents that run for a long time</td>
+<td>Run past the point of usefulness and ignore your preferences</td>
+</tr>
+<tr>
+<td>Moving state into the harness</td>
+<td>2027 prediction: memories and skills pile up and conflict, so <em>strategic forgetting</em> will matter</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked example: recovering a stuck RCA agent</strong></p>
+<pre><code> COMPACT THE SAME HISTORY                     CHECKED HANDOFF → FRESH CONTEXT
+ ════════════════════════                     ════════════════════════════════
+ &quot;package-version mismatch&quot; (wrong)           goal:       explain the failing build
+   └─ summarized neatly                       evidence:   these revisions + log links
+        └─ still &quot;package-version mismatch&quot;   rejected:   package-version (failed check X)
+                                              side effects done: none, no files changed
+ a neater summary of a wrong idea is          constraints + approvals: still in force
+ still a wrong idea                           next test:  does the failing config differ
+                                                          from the passing one?
+</code></pre>
+<p>Keep completed side effects and approval boundaries in the handoff. Losing either can cause duplicate work or change what the agent is allowed to do.</p>
+<p><strong>Try it:</strong> compare your current context handling against task-specific loadout plus a checked handoff, on the same tasks. Measure completion, wrong tool choices, repeated failed actions, tokens and time, and count the cases where filtering hid a necessary tool. Using fewer tokens alone doesn't count as success.</p>
+<p>His closing line: <em>the job is choosing where to be deterministic and where to be probabilistic.</em></p>
+<hr />
+<h2>8. Also worth knowing (other talks)</h2>
+<table>
+<thead>
+<tr>
+<th>Talk</th>
+<th>The one idea</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP keynote and others</td>
+<td>MCP in 2026: stateless (<a href="https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1442">SEP-1442</a>, shipped via SEP-2575 in May 2026, so a gateway can authorize each call), <strong>elicitation</strong> (server asks the user), <strong>Tasks</strong> (long work, check back later), Skills and Apps, <strong>tool search ~20K → &lt;1K tokens</strong>, WebMCP</td>
+<td>Tool search is tool loadout built into the protocol</td>
+</tr>
+<tr>
+<td>Harbor</td>
+<td>Diagnose <strong>task → harness → model</strong>. ~⅓ of the hardest benchmark tasks were broken, not hard. Model effect is 5.2× the harness effect, but timeouts follow the harness. An LLM judge was trusted only at κ ≥ 0.5 agreement with humans (humans agreed with each other at 0.66; the judge with humans at 0.51). From 6,000+ trajectories they built <strong>12 failure modes in 3 groups</strong> (below)</td>
+<td>When an eval fails, check the fixture first</td>
+</tr>
+<tr>
+<td><a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1259081">Yuki Watanabe</a> · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1258153">Prathmesh Patel</a></td>
+<td>Regression suite: capture a failing trace and turn it into a scored case ("feedback are the new tests"). CI/CD gates: a tool description is code; deterministic checks hard-fail, evals only score</td>
+<td>The "learn" step in the reading map</td>
+</tr>
+<tr>
+<td><a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1238862">Adaptive Security</a></td>
+<td>Once people trusted the bot, <em>"the judges went quiet."</em> A Gmail connector gained a send tool and Claude started emailing clients</td>
+<td>Evals are an operation, not a project; review connector changes like dependencies</td>
+</tr>
+<tr>
+<td>Adrian Warman (Orkes)</td>
+<td><em>"Let agents solve the problems they solve best, let workflows orchestrate and provide the deterministic layer."</em></td>
+<td>Chain RCA → bug fix → PR review in one workflow</td>
+</tr>
+<tr>
+<td><a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1201093">Nnenna Ndukwe (PolicyNIM)</a></td>
+<td>Pull in the relevant policies, with citations, <em>before</em> code is written; refuse to proceed when the evidence is weak</td>
+<td>The "before" half of review, paired with Block's "after"</td>
+</tr>
+<tr>
+<td>goose (<a href="https://github.com/block/goose">Douwe Osinga</a>, Block): <em>Agentic State Machines</em></td>
+<td><em>"The conversation becomes the state."</em> Each behavior (compaction, subagents, approval) is an operation that returns durable effects, not another <code>if</code> in the loop</td>
+<td>The "resume without repeating a side effect" part of experiment 3</td>
+</tr>
+<tr>
+<td>Hydro</td>
+<td>Enforce universal properties with types and frameworks: <em>"guardrails that sit outside the agent"</em></td>
+<td>A fast oracle for a narrow set of properties</td>
+</tr>
+<tr>
+<td>Entire</td>
+<td>Teams with coding agents ship 5× the PRs, each 3× larger; prompts kept with every commit</td>
+<td>Sessions and plans are becoming part of the codebase</td>
+</tr>
+<tr>
+<td>"Evals are the new PRDs"</td>
+<td>Write the AI tests first (credited to Dianne Penn, Anthropic)</td>
+<td>Matches Larson's paired evals</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Harbor's failure taxonomy</strong> (Han Xu, <em>Why Your Agent Is Failing</em>; 6,028 failed hard-task runs). Useful as the label set for experiment 1's failures:</p>
+<pre><code> CAPABILITY                    OPERATIONAL                     PROCESS
+ model didn't know             never reached the grader        how it ran, judged itself
+ ──────────────────────────    ────────────────────────────    ────────────────────────────
+ wrong factual answer  25.5%   silent deliverable (&quot;Done ✓&quot;,   step budget / timeout
+ algorithmic bug       18.7%     no file written)              false success claim
+ hidden-test regress.   8.2%   environment block (403, pip)      (passed its own smoke test)
+ wrong target / layer          syntax / language error         plan over implementation
+                               wrong output schema               (never wrote the file)
+ low-κ rubrics together: ~19%
+
+ diagnose in this order:  TASK (is the fixture broken?) ──► HARNESS ──► MODEL (swap last)
+</code></pre>
+<hr />
+<h2>9. Three experiments worth running</h2>
+<p>Three small experiments I'd run next, sized so any team can try them in a sprint or two.</p>
+<pre><code> NeMo + Larson + Harbor ──────────► 1 ONE SKILL EVAL
+ Block + Adaptive ────────────────► 2 ONE TRUSTED REVIEW
+ Drew + Security + LillyPod ──────► 3 ONE CONTROLLED RUN
+ HumanLayer ──────────────────────► &quot;next change&quot; case inside 1 and 3
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Experiment</th>
+<th>What to do</th>
+<th>Done when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>One skill eval</strong></td>
+<td>Pick one high-traffic skill. Freeze 5–10 fixtures from real misses, plus one adversarial case and one follow-up-requirement case. Run v1 vs v2 with deterministic assertions; re-run on model change</td>
+<td>Reusable fixture set + a one-page result; failures traced to fixture, harness or model</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>One trusted review</strong></td>
+<td>Score your PR reviewer on ~20 labelled PRs: precision, recall, agreement (κ) with human labels. Log each dropped finding with its reason; trial one second lens; tag high-risk PRs for a deeper pass</td>
+<td>Baseline precision/recall + an address rate you can track</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>One controlled run</strong></td>
+<td>RCA → fix → PR review with one shared run ID. Task-specific loadout; checked handoff on repeated failure; one allowed + one denied action per runner; resume without repeating a side effect</td>
+<td>Evidence linked end to end; a list of the controls that exist and the ones still to build</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Each experiment has a cheaper alternative. Here's why I'd pick the recommended path:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Recommended (A)</th>
+<th>Alternative (B)</th>
+<th>Why A</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Deterministic checks first (did it read the log, cite the failed job, avoid inventing an owner?), then a judge only for clarity</td>
+<td>One LLM judge reading the final answer, as in my NeMo pilot (§1)</td>
+<td>B scored 0.83–0.88 without seeing any evidence. A fluent wrong answer passes B</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Planner hands one TDD cycle at a time to a fresh subagent that returns JSON (Larson's harness)</td>
+<td>One long session with "remember to write the failing test first" reminders</td>
+<td>Failed output piles up in a long session, and §7 shows history beating instructions</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Specialists → skeptic coordinator → judge on the drops (Block)</td>
+<td>One prompt with a higher confidence bar</td>
+<td>B buys precision by dropping the subtle, high-severity findings</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Full review when a PR goes Draft → Ready (or on a label); cheap deterministic checks on every push</td>
+<td>Full multi-pass review on every push</td>
+<td>Five model passes per commit adds latency and cost where nobody is reading yet</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Reset rule: after 3 failed repair attempts on the same assertion, save the diff, end the session, start fresh from a checked handoff</td>
+<td>Keep compacting the same conversation</td>
+<td>Compaction keeps the wrong hypothesis (§7, AHC014 and Memento). The threshold of 3 is ours to tune, not from a talk</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Tools worth investigating</h2>
+<p>These are candidates, not adoption decisions. Start from the experiment and the missing capability, then pick the smallest tool that fills it.</p>
+<h3>Testing and code quality</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Useful for</th>
+<th>Talk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.promptfoo.dev/docs/intro/">Promptfoo</a></td>
+<td>Paired skill tests in CI</td>
+<td>Larson</td>
+</tr>
+<tr>
+<td><a href="https://github.com/mrlarson2007/copilot-tdd-harness">Larson's TDD harness</a></td>
+<td>A phase-and-evidence contract</td>
+<td>Larson</td>
+</tr>
+<tr>
+<td><a href="https://github.com/block/review">block/review</a></td>
+<td>Specialists + skeptical filter + appeal</td>
+<td>Block</td>
+</tr>
+<tr>
+<td><a href="https://github.blog/ai-and-ml/github-copilot/reviewbench-an-open-benchmark-for-ai-code-review/">ReviewBench</a></td>
+<td>Labelled PRs for scoring a reviewer</td>
+<td>Block</td>
+</tr>
+<tr>
+<td><a href="https://www.humanlayer.com/blog/show-me-skill">show-me</a></td>
+<td>Visual plans before a large diff</td>
+<td>HumanLayer</td>
+</tr>
+<tr>
+<td><a href="https://github.com/SprocketLab/slop-code-bench">SlopCodeBench</a></td>
+<td>Sequential requirements on the same code</td>
+<td>HumanLayer</td>
+</tr>
+<tr>
+<td><a href="https://github.com/harbor-framework/harbor">Harbor</a></td>
+<td>Separate task env, agent run and checks</td>
+<td>Harbor</td>
+</tr>
+<tr>
+<td><a href="https://docs.nvidia.com/nemo/agent-toolkit/latest/index.html">NeMo Agent Toolkit</a></td>
+<td>Historical pilot only</td>
+<td>Deprecated Oct 2026</td>
+</tr>
+</tbody>
+</table>
+<h3>Runtime, context and evidence</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Useful for</th>
+<th>Talk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://agentgateway.dev/">agentgateway</a></td>
+<td>Policy around model and tool calls</td>
+<td>Security</td>
+</tr>
+<tr>
+<td><a href="https://docs.docker.com/ai/sandboxes/">Docker Sandboxes</a></td>
+<td>microVM file and network limits</td>
+<td>Security</td>
+</tr>
+<tr>
+<td><a href="https://docs.langchain.com/langsmith/evaluation-types">LangSmith</a> / W&amp;B</td>
+<td>Traces and evaluation</td>
+<td>LillyPod</td>
+</tr>
+<tr>
+<td><a href="https://dspy.ai/current/tutorials/jev_decisions/">DSPy + Jev</a></td>
+<td>Task-specific tool loadout</td>
+<td>Drew</td>
+</tr>
+<tr>
+<td><a href="https://docs.langchain.com/oss/python/langgraph/persistence">LangGraph persistence</a> / <a href="https://modelcontextprotocol.io/extensions/tasks/overview">MCP Tasks</a></td>
+<td>Checkpoints / async task handles (neither alone is a durable workflow)</td>
+<td>Workflow talks</td>
+</tr>
+<tr>
+<td><a href="https://entire.com/blog/an-entirely-new-git-hosting-network">Entire</a> (<a href="https://github.com/entireio/cli">CLI</a>) / <a href="https://www.agentsview.io/">AgentsView</a></td>
+<td>Recover sessions and the reasons behind a commit</td>
+<td>Conference tools</td>
+</tr>
+<tr>
+<td>Buzz / <a href="https://github.com/block/coplan">CoPlan</a></td>
+<td>Review plans together before implementation</td>
+<td>Block</td>
+</tr>
+</tbody>
+</table>
+<h3>Also worth a look</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Useful for</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.dash0.com/documentation">Dash0</a></td>
+<td>OpenTelemetry logs, metrics and traces in one place</td>
+<td>Could link an agent's change to its runtime behavior</td>
+</tr>
+<tr>
+<td><a href="https://arize.com/docs/phoenix/">Arize Phoenix</a></td>
+<td>Open-source tracing and eval UI</td>
+<td>Pairs with OpenTelemetry-based tracing</td>
+</tr>
+<tr>
+<td><a href="https://docs.litellm.ai/">LiteLLM</a></td>
+<td>One proxy in front of many model providers</td>
+<td>My NAT pilot reached a local Nemotron through it</td>
+</tr>
+<tr>
+<td><a href="https://developers.llamaindex.ai/python/framework/">LlamaIndex</a></td>
+<td>Extraction that keeps page and table positions</td>
+<td>A value read from the wrong column gives a confident, false answer</td>
+</tr>
+<tr>
+<td><a href="https://strandsagents.com/latest/">Strands Agents</a></td>
+<td>Code-defined agents and multi-agent coordination</td>
+<td>Alternative orchestration layer</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>11. Papers and posts</h2>
+<table>
+<thead>
+<tr>
+<th>Read</th>
+<th>Why</th>
+<th>Test locally by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.dbreunig.com/2026/10/24/the-state-of-context-engineering.html">The State of Context Engineering</a></td>
+<td>Drew's full talk</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/wsff.md">Why Software Factories Fail</a></td>
+<td>Horthy's full argument, ~35 figures</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2603.24755">SlopCodeBench</a></td>
+<td>Agents extending their own code over changing requirements</td>
+<td>Adding a follow-up change to a passing task</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2605.20382">Do as I Say, Not as I Do</a></td>
+<td>Contradicting history vs instructions</td>
+<td>Measuring adherence after N failed attempts in an RCA run</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2610.20563">Scaling Discovery Requires Forgetting</a></td>
+<td>Fresh contexts from retained work beat continuing</td>
+<td>Checked handoff vs compaction</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2505.06120">LLMs Get Lost In Multi-Turn Conversation</a></td>
+<td>Failing to recover from early assumptions</td>
+<td>Recovery tests</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2505.03275">RAG-MCP</a></td>
+<td>Retrieve tool descriptions before selection</td>
+<td>Tool-choice accuracy and wrongly excluded tools</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2411.15399">Less is More</a></td>
+<td>Fewer functions → better selection (edge models)</td>
+<td>Validating on your stack</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2501.16214">Provence</a></td>
+<td>Context pruning for RAG</td>
+<td>Checking the supporting passage survives pruning</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Questions I'm still working through</h2>
+<ol>
+<li><strong>One eval harness or two?</strong> Skill evals (an <code>evals.json</code> next to the skill) and workflow evals (frozen ticket bundles, as in my NeMo pilot) could share one fixture format. Is one repo-local <code>evals/</code> folder simpler, or do they want to stay apart?</li>
+<li><strong>When should the full review run?</strong> Draft → Ready (or a label) seems like the right trigger for a multi-pass reviewer, with only deterministic checks on each push. Is that too late?</li>
+<li><strong>Where's the reset line?</strong> Agents that compact automatically can keep a wrong hypothesis alive (§7). I strongly think long runs need a no-progress reset. Is "3 failed attempts on the same assertion" about right, or is "N turns without a tool call" a better signal?</li>
+</ol>
+<p>If you've tried any of these, I'd like to hear what worked.</p>
+<hr />
+<h2>How to read the numbers</h2>
+<p>One caveat box in place of a disclaimer in every paragraph:</p>
+<ul>
+<li><strong>Speaker and vendor figures are attributed, not re-measured.</strong> That covers NVIDIA, CrowdStrike, IBM, Block internal data, Faros AI and HumanLayer's runs.</li>
+<li><strong>Benchmarks don't transfer.</strong> SlopCodeBench, ReviewBench and AHC014 results describe their own tasks and versions. Borrow the <em>method</em>, measure your own.</li>
+<li><strong>Small demos aren't performance evidence.</strong> That includes my NeMo pilot (5 replies) and Larson's single Jev call.</li>
+<li><strong>The applications are proposals.</strong> The "Try it" lines and §9 are my synthesis, kept separate from what the speakers said.</li>
+<li><strong>Source status:</strong> original slides were found for Block, Larson and Drew (write-up). HumanLayer has a recording and a write-up. No standalone PolicyNIM or LillyPod deck was located. Video pages may need accounts.</li>
+</ul>
+<p><strong>Sources:</strong> my notes from all three conferences, and the original slides and posts linked in each section. Product status was checked 30 Oct 2026.</p>
+</div>
+</main>
+<footer class="foot">
+  <p>© 2026 Mitchell. These are independent projects and concepts. None of them is a product of, or endorsed by, Roche, the U.S. Coast Guard, the Coast Guard Auxiliary, BoatUS, SBB, ÖBB or any agency named on these pages.</p>
+  <p>SBB, ÖBB, the U.S. National Design Studio and the Mini Metro UI case study are visual references only. No logos, marks or game artwork are used.</p>
+</footer>
+</div>
+</body>
+</html>
