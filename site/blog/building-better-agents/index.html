@@ -512,7 +512,7 @@
  nothing works until step 3                    each step can be run, tested, redirected
 </code></pre>
 <p><strong>What happens on the next change?</strong>. Horthy's small SlopCodeBench run added requirements to the same codebase over 8 checkpoints. Complexity rose for all three models plotted. Treat these as signals, not a full measure of maintainability.</p>
-<p><img alt="SlopCodeBench circuit_eval, checkpoints 1–8: mean cyclomatic complexity (left) and duplicated lines as % of source (right) for Opus 4.8, Sonnet 5 and Opus 5. From Horthy's article 3." src="images/humanlayer-complexity.jpg" /></p>
+<p><em>SlopCodeBench circuit_eval, checkpoints 1–8: mean cyclomatic complexity (left) and duplicated lines as % of source (right) for Opus 4.8, Sonnet 5 and Opus 5. From Horthy's article 3.</em> (<a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-opus-5-on-slop-code-bench.md">chart in HumanLayer's SlopCodeBench write-up</a>)</p>
 <p>What the figure shows, read from its own labels:</p>
 <table>
 <thead>
@@ -886,7 +886,7 @@
  Claude Opus 4.6           0.98 ───────────────────────────► 0.13
  Gemma 3 12B               below half after only a few turns       (13 models tested)
 </code></pre>
-<p><img alt="Camassa &amp; Shiller: instruction-following rate (1.0 = always follows the instruction) for 13 models as contradictory turns N go from 1 to 50. Task-based panel." src="images/context-heatmap.jpg" /></p>
+<p><em>Camassa &amp; Shiller: instruction-following rate (1.0 = always follows the instruction) for 13 models as contradictory turns N go from 1 to 50. Task-based panel.</em> (<a href="https://arxiv.org/abs/2605.20382">Figure 2(b) in Camassa &amp; Shiller</a>)</p>
 <p>A few rows read straight off the heatmap (the paper's columns are 1, 2, 3, 4, 6, 8, 11, 16, 22, 31, 43, 50):</p>
 <table>
 <thead>
@@ -963,7 +963,7 @@
                                      scratchpad memory ── wrong &quot;find tea&quot; goal survived summarization
  Result: playing from structured state was &quot;roughly as good as&quot; playing with vision
 </code></pre>
-<p><img alt="The Gemini 2.5 Pokémon harness: game RAM → structured state → Gemini, with navigation and puzzle tools and a scratchpad memory." src="images/pokemon-harness.jpg" /></p>
+<p><em>The Gemini 2.5 Pokémon harness: game RAM → structured state → Gemini, with navigation and puzzle tools and a scratchpad memory.</em> (<a href="https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf">Figure 14 in the Gemini 2.5 technical report</a>)</p>
 <p>A concise memory is still wrong if the fact inside it is wrong. <strong>Check facts before saving them as context.</strong> Sources: <a href="https://www.dbreunig.com/2025/06/17/an-agentic-case-study-playing-pok%C3%A9mon-with-gemini.html">Drew's Pokémon case study</a> · <a href="https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf">Gemini 2.5 technical report</a>.</p>
 <p><strong>Six tactics, three jobs</strong>:</p>
 <pre><code> SELECT                       SEPARATE                       REFRESH

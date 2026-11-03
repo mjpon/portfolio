@@ -354,7 +354,7 @@ The write-up's own number: about **1 hour** of planning up front cut review from
 
 **What happens on the next change?**. Horthy's small SlopCodeBench run added requirements to the same codebase over 8 checkpoints. Complexity rose for all three models plotted. Treat these as signals, not a full measure of maintainability.
 
-![SlopCodeBench circuit_eval, checkpoints 1–8: mean cyclomatic complexity (left) and duplicated lines as % of source (right) for Opus 4.8, Sonnet 5 and Opus 5. From Horthy's article 3.](images/humanlayer-complexity.jpg)
+*SlopCodeBench circuit_eval, checkpoints 1–8: mean cyclomatic complexity (left) and duplicated lines as % of source (right) for Opus 4.8, Sonnet 5 and Opus 5. From Horthy's article 3.* ([chart in HumanLayer's SlopCodeBench write-up](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-opus-5-on-slop-code-bench.md))
 
 What the figure shows, read from its own labels:
 
@@ -562,7 +562,7 @@ AGNTCon Day 2 · **[Talk write-up: The State of Context Engineering](https://www
  Gemma 3 12B               below half after only a few turns       (13 models tested)
 ```
 
-![Camassa & Shiller: instruction-following rate (1.0 = always follows the instruction) for 13 models as contradictory turns N go from 1 to 50. Task-based panel.](images/context-heatmap.jpg)
+*Camassa & Shiller: instruction-following rate (1.0 = always follows the instruction) for 13 models as contradictory turns N go from 1 to 50. Task-based panel.* ([Figure 2(b) in Camassa & Shiller](https://arxiv.org/abs/2605.20382))
 
 A few rows read straight off the heatmap (the paper's columns are 1, 2, 3, 4, 6, 8, 11, 16, 22, 31, 43, 50):
 
@@ -588,7 +588,7 @@ This is a controlled experiment, not a universal limit on chat length. It shows 
  Result: playing from structured state was "roughly as good as" playing with vision
 ```
 
-![The Gemini 2.5 Pokémon harness: game RAM → structured state → Gemini, with navigation and puzzle tools and a scratchpad memory.](images/pokemon-harness.jpg)
+*The Gemini 2.5 Pokémon harness: game RAM → structured state → Gemini, with navigation and puzzle tools and a scratchpad memory.* ([Figure 14 in the Gemini 2.5 technical report](https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf))
 
 A concise memory is still wrong if the fact inside it is wrong. **Check facts before saving them as context.** Sources: [Drew's Pokémon case study](https://www.dbreunig.com/2025/06/17/an-agentic-case-study-playing-pok%C3%A9mon-with-gemini.html) · [Gemini 2.5 technical report](https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf).
 
