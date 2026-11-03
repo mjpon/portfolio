@@ -287,7 +287,6 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Try it:</strong> freeze one representative investigation ticket, including some cases the agent currently gets <em>wrong</em>, and replay the current and proposed agent on it.</p>
 <p><strong>Status:</strong> NVIDIA's docs say NAT "has been deprecated as of October 2026 and will reach end of life (EOL) by end of year 2026" (checked 30 Oct). Keep the lesson, not the dependency.</p>
 <hr />
 <h2>2. Security: controls must follow the agent</h2>
@@ -397,7 +396,6 @@
       ▲                                                        │
       └──────────── evidence contradicts the plan? replan ─────┘
 </code></pre>
-<p><strong>Try it:</strong> for each place an agent runs (laptop, CI runner, gateway, sandbox), can you show one allowed operation and one denied operation, each with a record you can attribute? It's a cheap verification exercise, and the gaps it finds are the ones that matter.</p>
 <p><strong>Watch/read:</strong> <a href="https://www.wearedevelopers.com/events/world-congress-2026-north-america/sessions/1739-agentic-drift">Agentic Drift</a> · <a href="https://www.wearedevelopers.com/videos/100607-the-new-security-stack">The New Security Stack</a> (may need a WeAreDevelopers account) · <a href="https://coreweave.com/fully-connected-2026/on-demand">CoreWeave on-demand library</a> (lists "Securing AI at Scale: CoreWeave and CrowdStrike").</p>
 <hr />
 <h2>3. LillyPod: make AI fit the scientist</h2>
@@ -453,7 +451,7 @@
    + keep the HPC experts; learn from the research power users
 </code></pre>
 <p>Routing and governance were still evolving, so this isn't a finished reference architecture.</p>
-<p><strong>Try it:</strong> can someone go from a ticket or PR to the evidence behind an agent's result without stitching together three different histories? You can borrow the operating model without buying the hardware.</p>
+<p>You can borrow the operating model without buying the hardware.</p>
 <hr />
 <h2>4. HumanLayer (Dex Horthy): the verification bottleneck</h2>
 <p>AGNTCon Day 1 · <a href="https://www.youtube.com/watch?v=ix1qQK1IvmA">Talk recording, "Fighting Code Slop"</a> (posted by the Agentic AI Foundation under a different title from the program) · <a href="https://www.youtube.com/watch?v=Ib5GBkD555M">Related AI Engineer talk</a> · <a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/wsff.md">Write-up: Why Software Factories Fail</a> · Horthy's articles 1–3: <a href="https://x.com/dexhorthy/status/2080697380379427275">the bottleneck</a>, <a href="https://x.com/dexhorthy/status/2081058573556306030">four reviews</a>, <a href="https://x.com/dexhorthy/status/2081797628552270027">the next change</a> · SlopCodeBench runs: <a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-opus-5-on-slop-code-bench.md">Opus 5</a>, <a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-sol-fable-kimi-on-slop-code-bench.md">Sol/Fable/Kimi</a> · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1291877">Session</a></p>
@@ -584,7 +582,6 @@
 </tbody>
 </table>
 <p><strong>His target:</strong> work within the model's limits and aim for <strong>2–3× faster with the quality kept</strong>, not 10–100× faster.</p>
-<p><strong>Try it:</strong> for the next sizeable agent-built change, can the reviewer approve the shapes (contracts, types, file plan) and a thin slice <em>before</em> the agent builds the rest? Then add one realistic follow-up requirement and see whether the change fits the design or needs copied logic.</p>
 <hr />
 <h2>5. Michael Larson: ship skills like software</h2>
 <p>AGNTCon Day 2 · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1256939">Session</a> · <a href="https://sessionize.com/download/iglaflez~WVwsaBMFSGUwjtjhQq4vPK.pdf~shipping_agent_skills_safely1.pdf">Original slides (PDF)</a> · <a href="https://github.com/mrlarson2007/copilot-tdd-harness">TDD harness</a></p>
@@ -699,7 +696,7 @@
 <p>The call took 222 ms. Total Jev spend across all his runs: <strong>$0.01</strong>. One slide line matters a lot: <strong>"Promptfoo records scores. CI checks completion. No pass thresholds."</strong> Making a score <em>block</em> a release would be an extension, not his demo. The demo's "commit your changes" check is specific to that task, not a general rule.</p>
 <p><strong>Two more slides worth repeating:</strong> portability needs testing (a skill that assumes a tool named <code>Bash</code> can break on another agent with a different shell or approval model), and checking skills for attacks takes three steps: <strong>scan → review → sandbox</strong>.</p>
 <p><strong>His challenge to the room:</strong> <em>add an eval to one skill you're sharing.</em></p>
-<p><strong>Try it:</strong> pick one high-traffic skill, freeze 5–10 fixtures from real misses plus one adversarial case, and re-run them on every skill, model or client change. When a case fails, check the fixture and the harness before blaming the model.</p>
+<p>When a case fails, check the fixture and the harness before blaming the model.</p>
 <hr />
 <h2>6. Block (Joah Gerstenberg): Cut the Noise</h2>
 <p>AGNTCon Day 1 · <a href="https://joahg.dev/cut-the-noise/">Slides with sources</a> · <a href="https://sessionize.com/download/ibtatyec~fYYKmmxxU1W8LHdNvnjTZJ.pdf~cut-the-noise-joah-gerstenberg-agntcon-2026-1.pdf">Slide PDF</a> · <a href="https://github.com/block/review">block/review</a> · <a href="https://events.linuxfoundation.org/agntcon-mcpcon-north-america/program/schedule/?id=1247706">Session</a></p>
@@ -1082,7 +1079,6 @@
                                                           from the passing one?
 </code></pre>
 <p>Keep completed side effects and approval boundaries in the handoff. Losing either can cause duplicate work or change what the agent is allowed to do.</p>
-<p><strong>Try it:</strong> compare your current context handling against task-specific loadout plus a checked handoff, on the same tasks. Measure completion, wrong tool choices, repeated failed actions, tokens and time, and count the cases where filtering hid a necessary tool. Using fewer tokens alone doesn't count as success.</p>
 <p>His closing line: <em>the job is choosing where to be deterministic and where to be probabilistic.</em></p>
 <hr />
 <h2>8. Also worth knowing (other talks)</h2>
@@ -1441,7 +1437,7 @@
 <hr />
 <h2>Questions I'm still working through</h2>
 <ol>
-<li><strong>One eval harness or two?</strong> Skill evals (an <code>evals.json</code> next to the skill) and workflow evals (frozen ticket bundles, as in my NeMo pilot) could share one fixture format. Is one repo-local <code>evals/</code> folder simpler, or do they want to stay apart?</li>
+<li><strong>One eval harness or two?</strong> Skill evals (an <code>evals.json</code> next to the skill) and workflow evals (frozen ticket bundles, as in my NeMo pilot) could share one fixture format. Is one repo-local <code>evals/</code> folder simpler, or should they stay apart?</li>
 <li><strong>When should the full review run?</strong> Draft → Ready (or a label) seems like the right trigger for a multi-pass reviewer, with only deterministic checks on each push. Is that too late?</li>
 <li><strong>Where's the reset line?</strong> Agents that compact automatically can keep a wrong hypothesis alive (§7). I strongly think long runs need a no-progress reset. Is "3 failed attempts on the same assertion" about right, or is "N turns without a tool call" a better signal?</li>
 </ol>
@@ -1453,7 +1449,7 @@
 <li><strong>Speaker and vendor figures are attributed, not re-measured.</strong> That covers NVIDIA, CrowdStrike, IBM, Block internal data, Faros AI and HumanLayer's runs.</li>
 <li><strong>Benchmarks don't transfer.</strong> SlopCodeBench, ReviewBench and AHC014 results describe their own tasks and versions. Borrow the <em>method</em>, measure your own.</li>
 <li><strong>Small demos aren't performance evidence.</strong> That includes my NeMo pilot (5 replies) and Larson's single Jev call.</li>
-<li><strong>The applications are proposals.</strong> The "Try it" lines and §9 are my synthesis, kept separate from what the speakers said.</li>
+<li><strong>The applications are proposals.</strong> §9 and the closing questions are my synthesis, kept separate from what the speakers said.</li>
 <li><strong>Source status:</strong> original slides were found for Block, Larson and Drew (write-up). HumanLayer has a recording and a write-up. No standalone PolicyNIM or LillyPod deck was located. Video pages may need accounts.</li>
 </ul>
 <p><strong>Sources:</strong> my notes from all three conferences, and the original slides and posts linked in each section. Product status was checked 30 Oct 2026.</p>

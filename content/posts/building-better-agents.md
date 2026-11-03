@@ -180,8 +180,6 @@ A small pilot I ran before the conferences.
 | Token ownership | Authorized ownership record, if available | Says "unknown" when the evidence is missing |
 | Agent behavior | Tool-call trace and final answer | Shows the evidence was read; links each claim to its source |
 
-**Try it:** freeze one representative investigation ticket, including some cases the agent currently gets *wrong*, and replay the current and proposed agent on it.
-
 **Status:** NVIDIA's docs say NAT "has been deprecated as of October 2026 and will reach end of life (EOL) by end of year 2026" (checked 30 Oct). Keep the lesson, not the dependency.
 
 ---
@@ -259,8 +257,6 @@ Watch out with Docker Sandboxes: direct mounts write to the host, and deleting t
       └──────────── evidence contradicts the plan? replan ─────┘
 ```
 
-**Try it:** for each place an agent runs (laptop, CI runner, gateway, sandbox), can you show one allowed operation and one denied operation, each with a record you can attribute? It's a cheap verification exercise, and the gaps it finds are the ones that matter.
-
 **Watch/read:** [Agentic Drift](https://www.wearedevelopers.com/events/world-congress-2026-north-america/sessions/1739-agentic-drift) · [The New Security Stack](https://www.wearedevelopers.com/videos/100607-the-new-security-stack) (may need a WeAreDevelopers account) · [CoreWeave on-demand library](https://coreweave.com/fully-connected-2026/on-demand) (lists "Securing AI at Scale: CoreWeave and CrowdStrike").
 
 ---
@@ -297,7 +293,7 @@ Eli Lilly, CoreWeave Fully Connected
 
 Routing and governance were still evolving, so this isn't a finished reference architecture.
 
-**Try it:** can someone go from a ticket or PR to the evidence behind an agent's result without stitching together three different histories? You can borrow the operating model without buying the hardware.
+You can borrow the operating model without buying the hardware.
 
 ---
 
@@ -379,8 +375,6 @@ Horthy also ran a TypeScript slop linter over the agents' code: **174.88 and 178
 
 **His target:** work within the model's limits and aim for **2–3× faster with the quality kept**, not 10–100× faster.
 
-**Try it:** for the next sizeable agent-built change, can the reviewer approve the shapes (contracts, types, file plan) and a thin slice *before* the agent builds the rest? Then add one realistic follow-up requirement and see whether the change fits the design or needs copied logic.
-
 ---
 
 ## 5. Michael Larson: ship skills like software
@@ -450,7 +444,7 @@ The call took 222 ms. Total Jev spend across all his runs: **$0.01**. One slide 
 
 **His challenge to the room:** *add an eval to one skill you're sharing.*
 
-**Try it:** pick one high-traffic skill, freeze 5–10 fixtures from real misses plus one adversarial case, and re-run them on every skill, model or client change. When a case fails, check the fixture and the harness before blaming the model.
+When a case fails, check the fixture and the harness before blaming the model.
 
 ---
 
@@ -676,8 +670,6 @@ The paper's abstract reports up to 15% over parallel agents and up to 39% over a
 
 Keep completed side effects and approval boundaries in the handoff. Losing either can cause duplicate work or change what the agent is allowed to do.
 
-**Try it:** compare your current context handling against task-specific loadout plus a checked handoff, on the same tasks. Measure completion, wrong tool choices, repeated failed actions, tokens and time, and count the cases where filtering hid a necessary tool. Using fewer tokens alone doesn't count as success.
-
 His closing line: *the job is choosing where to be deterministic and where to be probabilistic.*
 
 ---
@@ -803,7 +795,7 @@ These are candidates, not adoption decisions. Start from the experiment and the 
 
 ## Questions I'm still working through
 
-1. **One eval harness or two?** Skill evals (an `evals.json` next to the skill) and workflow evals (frozen ticket bundles, as in my NeMo pilot) could share one fixture format. Is one repo-local `evals/` folder simpler, or do they want to stay apart?
+1. **One eval harness or two?** Skill evals (an `evals.json` next to the skill) and workflow evals (frozen ticket bundles, as in my NeMo pilot) could share one fixture format. Is one repo-local `evals/` folder simpler, or should they stay apart?
 2. **When should the full review run?** Draft → Ready (or a label) seems like the right trigger for a multi-pass reviewer, with only deterministic checks on each push. Is that too late?
 3. **Where's the reset line?** Agents that compact automatically can keep a wrong hypothesis alive (§7). I strongly think long runs need a no-progress reset. Is "3 failed attempts on the same assertion" about right, or is "N turns without a tool call" a better signal?
 
@@ -818,7 +810,7 @@ One caveat box in place of a disclaimer in every paragraph:
 - **Speaker and vendor figures are attributed, not re-measured.** That covers NVIDIA, CrowdStrike, IBM, Block internal data, Faros AI and HumanLayer's runs.
 - **Benchmarks don't transfer.** SlopCodeBench, ReviewBench and AHC014 results describe their own tasks and versions. Borrow the *method*, measure your own.
 - **Small demos aren't performance evidence.** That includes my NeMo pilot (5 replies) and Larson's single Jev call.
-- **The applications are proposals.** The "Try it" lines and §9 are my synthesis, kept separate from what the speakers said.
+- **The applications are proposals.** §9 and the closing questions are my synthesis, kept separate from what the speakers said.
 - **Source status:** original slides were found for Block, Larson and Drew (write-up). HumanLayer has a recording and a write-up. No standalone PolicyNIM or LillyPod deck was located. Video pages may need accounts.
 
 **Sources:** my notes from all three conferences, and the original slides and posts linked in each section. Product status was checked 30 Oct 2026.
