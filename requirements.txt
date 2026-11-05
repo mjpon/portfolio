@@ -1,0 +1,2 @@
+# Renders content/posts in tools/build_site.py. Pinned exactly; CI installs this file and nothing else.
+Markdown==3.11.2

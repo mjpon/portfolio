@@ -1,17 +1,31 @@
-"""Builds the portfolio site: home page, project pages and the 404 page.
+"""Builds the portfolio site: home page, project pages, the blog and the 404 page.
 
 Run from anywhere:  python3 tools/build_site.py
 It writes into ../site (next to this folder). Set SITE_DIR to write somewhere else.
+Posts are read from content/posts. Rendering them needs the library in requirements.txt.
 """
 import html
 import os
 import pathlib
+import re
 import shutil
+from datetime import datetime, timezone
+from email.utils import format_datetime
+from xml.etree import ElementTree as ET
+
+try:
+    import markdown
+except ImportError:
+    raise SystemExit("build_site.py: Python-Markdown is not installed. Run: pip install -r requirements.txt")
 
 HERE = pathlib.Path(__file__).resolve().parent
 PROD = pathlib.Path(os.environ.get("SITE_DIR", HERE.parent / "site"))
 PREV = pathlib.Path(os.environ["PREVIEW_DIR"]) if os.environ.get("PREVIEW_DIR") else None
 CSS_FILE = PROD / "styles.css"
+POSTS = HERE.parent / "content" / "posts"
+ORIGIN = "https://mitchell-pon.com"
+BLOG_DESC = "Notes and short write-ups."
+SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 NAME = "Mitchell"
 GITHUB = "https://github.com/mjpon"
@@ -365,19 +379,28 @@ def head(title, desc, css_href, assets="", extra=""):
     )
 
 
-def header(home, root=None):
+def header(home, root=None, here=None):
+    # here is "blog" at /blog/ and "post" at /blog/<slug>/. Work pages leave it unset.
+    # A set root (the 404 page passes "/") wins and uses absolute paths. Every other
+    # page uses a relative prefix, the same way work pages use "../../".
     if root:
-        mark, work, about, contact = root, root + "#work", root + "#about", root + "#contact"
+        up, mark, blog = root, root, root + "blog/"
     elif home:
-        mark, work, about, contact = "#", "#work", "#about", "#contact"
+        up, mark, blog = "", "#", "blog/"
+    elif here == "blog":
+        up, mark, blog = "../", "../", "../blog/"
     else:
-        mark, work, about, contact = "../../", "../../#work", "../../#about", "../../#contact"
-    current = "" if root else ' aria-current="true"'
+        up, mark, blog = "../../", "../../", "../../blog/"
+    work, about, contact = up + "#work", up + "#about", up + "#contact"
+    on_blog = here in ("blog", "post") and not root
+    work_current = "" if root or on_blog else ' aria-current="true"'
+    blog_current = ' aria-current="true"' if on_blog else ""
     return (
         '<header class="top">\n'
         f'  <a class="mark" href="{mark}">{LOGO}<span class="word">{NAME}</span></a>\n'
         '  <nav class="nav" aria-label="Main">\n'
-        f'    <a href="{work}"{current}>Work</a>\n'
+        f'    <a href="{work}"{work_current}>Work</a>\n'
+        f'    <a href="{blog}"{blog_current}>Blog</a>\n'
         f'    <a href="{about}">About</a>\n'
         f'    <a href="{contact}">Contact</a>\n'
         "  </nav>\n"
@@ -635,6 +658,174 @@ def home_fragment_preview(css):
     )
 
 
+def die(message):
+    raise SystemExit(f"build_site.py: {message}")
+
+
+def format_date(day):
+    return f"{day.strftime('%B')} {day.day}, {day.year}"
+
+
+def parse_post(path):
+    # Front matter is the block between the first two lines that are exactly ---.
+    # Required fields: title, date (YYYY-MM-DD), summary. draft is optional.
+    rel = path.relative_to(HERE.parent).as_posix()
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0] != "---":
+        die(f"{rel}: front matter must start with a --- line")
+    close = None
+    for i, line in enumerate(lines[1:], start=1):
+        if line == "---":
+            close = i
+            break
+    if close is None:
+        die(f"{rel}: front matter is missing its closing --- line")
+    meta = {}
+    for line in lines[1:close]:
+        if not line.strip():
+            continue
+        if ":" not in line:
+            die(f"{rel}: bad front matter line: {line}")
+        key, value = line.split(":", 1)
+        key, value = key.strip(), value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        if key not in ("title", "date", "summary", "draft"):
+            die(f"{rel}: unknown front matter field {key}")
+        if key in meta:
+            die(f"{rel}: duplicate front matter field {key}")
+        meta[key] = value
+    missing = [key for key in ("title", "date", "summary") if not meta.get(key)]
+    if missing:
+        die(f"{rel}: missing {', '.join(missing)}")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", meta["date"]):
+        die(f"{rel}: bad date {meta['date']!r} (expected YYYY-MM-DD)")
+    try:
+        posted = datetime.strptime(meta["date"], "%Y-%m-%d").date()
+    except ValueError:
+        die(f"{rel}: bad date {meta['date']!r} (expected YYYY-MM-DD)")
+    draft = meta.get("draft", "false")
+    if draft not in ("true", "false"):
+        die(f"{rel}: draft must be true or false, not {draft!r}")
+    slug = path.stem
+    if not SLUG_RE.fullmatch(slug):
+        die(f"{rel}: slug {slug!r} must be lowercase words separated by hyphens")
+    body = "\n".join(lines[close + 1:])
+    return dict(slug=slug, title=meta["title"], date=posted, summary=meta["summary"],
+                draft=draft == "true", body=body)
+
+
+def load_posts():
+    if not POSTS.is_dir():
+        die("content/posts is missing")
+    posts = [parse_post(path) for path in sorted(POSTS.glob("*.md"))]
+    posts.sort(key=lambda post: (-post["date"].toordinal(), post["slug"]))
+    return [post for post in posts if not post["draft"]]
+
+
+def render_markdown(text):
+    return markdown.markdown(text, extensions=["fenced_code", "sane_lists", "tables"]).strip()
+
+
+def blog_index_page(posts):
+    if posts:
+        items = []
+        for post in posts:
+            items.append(
+                f'<li><a href="{a(post["slug"] + "/")}">'
+                f'<span class="blog-date"><time datetime="{post["date"].isoformat()}">{e(format_date(post["date"]))}</time></span>'
+                f'<span class="blog-title">{e(post["title"])}</span>'
+                f'<span class="blog-summary">{e(post["summary"])}</span>'
+                "</a></li>\n"
+            )
+        listing = '<ul class="blog-posts">\n' + "".join(items) + "</ul>\n"
+    else:
+        listing = '<p class="blog-empty">No posts yet.</p>\n'
+    return (
+        head(f"Blog | {NAME}", BLOG_DESC, "../styles.css", "../")
+        + '<a class="skip" href="#main">Skip to content</a>\n'
+        + SPRITE
+        + '<div class="wrap">\n'
+        + header(False, here="blog")
+        + '<main id="main" class="page">\n'
+        '<h1 class="display sm">Blog</h1>\n'
+        + listing
+        + "</main>\n"
+        + footer()
+        + "</div>\n</body>\n</html>\n"
+    )
+
+
+def blog_post_page(post):
+    return (
+        head(f"{post['title']} | {NAME}", post["summary"], "../../styles.css", "../../")
+        + '<a class="skip" href="#main">Skip to content</a>\n'
+        + SPRITE
+        + '<div class="wrap">\n'
+        + header(False, here="post")
+        + '<main id="main" class="page">\n'
+        + '<a class="textlink back" href="../../blog/">All posts</a>\n'
+        + f'<h1 class="display sm">{e(post["title"])}</h1>\n'
+        + f'<p class="blog-date"><time datetime="{post["date"].isoformat()}">{e(format_date(post["date"]))}</time></p>\n'
+        + '<div class="blog-body">\n'
+        + render_markdown(post["body"])
+        + "\n</div>\n"
+        + "</main>\n"
+        + footer()
+        + "</div>\n</body>\n</html>\n"
+    )
+
+
+def xml_text(root):
+    return ET.tostring(root, encoding="unicode", xml_declaration=True) + "\n"
+
+
+def feed_xml(posts):
+    rss = ET.Element("rss", {"version": "2.0"})
+    channel = ET.SubElement(rss, "channel")
+    ET.SubElement(channel, "title").text = NAME
+    ET.SubElement(channel, "link").text = ORIGIN + "/blog/"
+    ET.SubElement(channel, "description").text = BLOG_DESC
+    for post in posts:
+        item = ET.SubElement(channel, "item")
+        url = f"{ORIGIN}/blog/{post['slug']}/"
+        published = datetime(post["date"].year, post["date"].month, post["date"].day, tzinfo=timezone.utc)
+        ET.SubElement(item, "title").text = post["title"]
+        ET.SubElement(item, "link").text = url
+        guid = ET.SubElement(item, "guid", {"isPermaLink": "true"})
+        guid.text = url
+        ET.SubElement(item, "pubDate").text = format_datetime(published)
+        ET.SubElement(item, "description").text = post["summary"]
+    return xml_text(rss)
+
+
+def sitemap_xml(posts):
+    urlset = ET.Element("urlset", {"xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9"})
+    locs = [ORIGIN + "/"]
+    locs += [f"{ORIGIN}/work/{project['slug']}/" for project in P]
+    locs.append(ORIGIN + "/blog/")
+    locs += [f"{ORIGIN}/blog/{post['slug']}/" for post in posts]
+    for loc in locs:
+        node = ET.SubElement(urlset, "url")
+        ET.SubElement(node, "loc").text = loc
+    return xml_text(urlset)
+
+
+def write_blog(root, posts):
+    blog = root / "blog"
+    keep = {post["slug"] for post in posts}
+    if blog.is_dir():
+        for child in blog.iterdir():
+            if child.is_dir() and child.name not in keep:
+                shutil.rmtree(child)
+    write(blog / "index.html", blog_index_page(posts))
+    for post in posts:
+        write(blog / post["slug"] / "index.html", blog_post_page(post))
+    write(blog / "feed.xml", feed_xml(posts))
+    write(root / "sitemap.xml", sitemap_xml(posts))
+
+
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
@@ -642,11 +833,14 @@ def write(path, text):
 
 def main():
     css = CSS_FILE.read_text(encoding="utf-8")
+    posts = load_posts()
     write(PROD / "index.html", home_page_prod())
     write(PROD / "404.html", not_found_page())
     for i, p in enumerate(P):
         write(PROD / "work" / p["slug"] / "index.html", detail_page(i, False))
+    write_blog(PROD, posts)
     if PREV is not None:  # only used to publish a preview of the site
+        # Blog pages are skipped in preview. The preview only republishes the home page and project pages.
         if PREV.exists():
             shutil.rmtree(PREV)
         PREV.mkdir(parents=True)
