@@ -2,6 +2,7 @@
 title: Building better agents: what I heard at three fall conferences, and what it changes
 date: 2026-10-31
 summary: Agents made writing code cheap, so checking it is now the expensive part. Every talk I picked was about building the checks around the model, not about waiting for a better model.
+draft: true
 ---
 
 *31 October 2026 · Notes from WeAreDevelopers World Congress NA (San Jose, 24 Sep), CoreWeave Fully Connected (San Francisco, 29 Sep–1 Oct) and AGNTCon + MCPCon NA (San Jose, 22–23 Oct).*
